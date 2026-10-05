@@ -1,0 +1,40 @@
+# Stage 1: Build & Composer Dependencies
+FROM composer:2.7 AS composer_builder
+
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-interaction --no-scripts --prefer-dist --optimize-autoloader
+
+# Stage 2: Production PHP-FPM 8.3 Runtime
+FROM php:8.3-fpm-alpine
+
+# Install system dependencies and PHP extensions
+RUN apk add --no-cache \
+    curl \
+    libzip-dev \
+    libpng-dev \
+    oniguruma-dev \
+    mysql-client \
+    && docker-php-ext-install -j$(nproc) pdo_mysql bcmath opcache zip \
+    && rm -rf /var/cache/apk/*
+
+# Copy production PHP configuration
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+WORKDIR /var/www/html
+
+# Copy vendor from builder stage
+COPY --from=composer_builder /app/vendor /var/www/html/vendor
+
+# Copy application files
+COPY . /var/www/html
+
+# Set correct permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+USER www-data
+
+EXPOSE 9000
+
+CMD ["php-fpm"]
