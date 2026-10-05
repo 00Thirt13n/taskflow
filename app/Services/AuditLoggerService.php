@@ -10,20 +10,22 @@ use Illuminate\Support\Facades\Log;
 class AuditLoggerService
 {
     /**
-     * Record an audit event.
+     * Record an append-only audit event.
      */
     public function log(
         string $action,
         string $entityType,
         ?int $entityId = null,
         ?array $metadata = null,
-        ?User $actor = null
+        ?User $actor = null,
+        ?int $userId = null,
+        mixed $request = null
     ): ?AuditLog {
         try {
-            $user = $actor ?? Auth::user();
+            $effectiveUserId = $userId ?? $actor?->id ?? Auth::id();
 
             return AuditLog::create([
-                'user_id' => $user?->id,
+                'user_id' => $effectiveUserId,
                 'action' => $action,
                 'entity_type' => $entityType,
                 'entity_id' => $entityId,

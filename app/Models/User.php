@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -46,9 +47,41 @@ class User extends Authenticatable
         return $this->hasMany(Task::class);
     }
 
+    public function assignedTasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'assignee_id');
+    }
+
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'project_members')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    public function ownedProjects(): HasMany
+    {
+        return $this->hasMany(Project::class, 'owner_id');
+    }
+
     public function auditLogs(): HasMany
     {
         return $this->hasMany(AuditLog::class);
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    public function savedViews(): HasMany
+    {
+        return $this->hasMany(SavedView::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
     }
 
     public function isAdmin(): bool
