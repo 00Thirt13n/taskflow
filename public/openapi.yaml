@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: TaskFlow REST API
-  description: High-performance, production-ready Task Management REST API built with Laravel 11, Sanctum, and MySQL 8.
-  version: 1.0.0
+  title: TaskFlow Enterprise Work Management REST API
+  description: High-performance, production-ready Enterprise Work Management REST API built with Laravel 11, Sanctum, MySQL 8, and React 18.
+  version: 2.0.0
 servers:
   - url: http://localhost:8000/api
     description: Local development API server
@@ -12,7 +12,7 @@ servers:
 paths:
   /health:
     get:
-      summary: System & Database Health Check
+      summary: Public System & Database Health Check
       description: Returns operational status, database connectivity, latency, memory usage, and uptime.
       responses:
         '200':
@@ -34,7 +34,7 @@ paths:
   /register:
     post:
       summary: Register a new user
-      description: Creates a standard user account and issues a personal access token.
+      description: Creates a standard user account and issues a personal access token. Rate limited to 10 attempts per minute.
       requestBody:
         required: true
         content:
@@ -60,14 +60,14 @@ paths:
                   example: Password123!
       responses:
         '201':
-          description: Registration successful
+          description: Registration successful with token
         '422':
           description: Validation error
 
   /login:
     post:
       summary: Authenticate user
-      description: Validates email and password, returning user profile and Bearer token.
+      description: Validates email and password, returning user profile and Sanctum Bearer token.
       requestBody:
         required: true
         content:
@@ -106,12 +106,158 @@ paths:
         '200':
           description: User profile and role permissions
 
-  /tasks:
+  /workspaces:
     get:
-      summary: List filtered and paginated tasks
+      summary: List user workspaces
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Array of workspaces the user has access to
+
+  /projects:
+    get:
+      summary: List all projects with computed health and progress metrics
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Collection of projects with task counts, health, and member counts
+    post:
+      summary: Create a new project
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, key]
+              properties:
+                name:
+                  type: string
+                  example: Website Redesign
+                key:
+                  type: string
+                  example: WEB
+                description:
+                  type: string
+                  example: Customer-facing marketing & app portal refresh
+                status:
+                  type: string
+                  enum: [planning, active, on_hold, completed, archived]
+                  default: active
+                color:
+                  type: string
+                  example: "#6366f1"
+                start_date:
+                  type: string
+                  format: date
+                target_date:
+                  type: string
+                  format: date
+      responses:
+        '201':
+          description: Project created successfully
+
+  /projects/{id}:
+    get:
+      summary: Retrieve project details with members and activity
       security:
         - BearerAuth: []
       parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Project detail
+    put:
+      summary: Update project properties
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Project updated
+    delete:
+      summary: Delete project (Owner or Admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Project deleted
+
+  /projects/{id}/members:
+    get:
+      summary: List project members
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Members list with project roles
+    post:
+      summary: Add member to project
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id:
+                  type: integer
+                role:
+                  type: string
+                  enum: [owner, manager, member, viewer]
+                  default: member
+      responses:
+        '200':
+          description: Member added
+
+  /tasks:
+    get:
+      summary: List filtered and paginated tasks or unpaginated board/calendar/timeline collections
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: project_id
+          in: query
+          schema:
+            type: integer
+        - name: assignee_id
+          in: query
+          schema:
+            type: integer
         - name: status
           in: query
           schema:
@@ -122,25 +268,20 @@ paths:
           schema:
             type: string
             enum: [low, medium, high]
-        - name: due_date
+        - name: view_mode
           in: query
+          description: Mode for multi-view (board, calendar, timeline returns full list)
           schema:
             type: string
-            format: date
+            enum: [table, board, calendar, timeline]
+        - name: is_blocked
+          in: query
+          schema:
+            type: boolean
         - name: search
           in: query
           schema:
             type: string
-        - name: sort_by
-          in: query
-          schema:
-            type: string
-            enum: [created_at, due_date]
-        - name: sort_order
-          in: query
-          schema:
-            type: string
-            enum: [asc, desc]
         - name: page
           in: query
           schema:
@@ -153,7 +294,7 @@ paths:
             default: 10
       responses:
         '200':
-          description: Paginated tasks collection
+          description: Tasks collection
 
     post:
       summary: Create a new task
@@ -167,33 +308,60 @@ paths:
               type: object
               required: [title, status, priority]
               properties:
+                project_id:
+                  type: integer
                 title:
                   type: string
                   example: Deploy Nginx reverse proxy
                 description:
                   type: string
-                  example: Configure upstream fastcgi pass and SSL termination
                 status:
                   type: string
                   enum: [todo, in-progress, done]
-                  example: todo
                 priority:
                   type: string
                   enum: [low, medium, high]
-                  example: high
+                assignee_id:
+                  type: integer
                 due_date:
                   type: string
                   format: date
-                  example: "2026-10-15"
+                estimated_minutes:
+                  type: integer
       responses:
         '201':
           description: Task created
-        '422':
-          description: Validation failure
+
+  /tasks/bulk:
+    post:
+      summary: Perform batch operations on tasks (status update, priority change, deletion)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action, task_ids]
+              properties:
+                action:
+                  type: string
+                  enum: [status, priority, delete]
+                task_ids:
+                  type: array
+                  items:
+                    type: integer
+                value:
+                  type: string
+                  description: New status or priority value (required for status/priority action)
+      responses:
+        '200':
+          description: Bulk operation completed
 
   /tasks/{id}:
     get:
-      summary: Get specific task by ID
+      summary: Get task details including subtasks, dependencies, comments, and activity logs
       security:
         - BearerAuth: []
       parameters:
@@ -204,12 +372,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: Task details
-        '403':
-          description: Forbidden (IDOR prevention)
-        '404':
-          description: Task not found
-
+          description: Task detail object
     put:
       summary: Update task
       security:
@@ -223,9 +386,6 @@ paths:
       responses:
         '200':
           description: Task updated
-        '403':
-          description: Forbidden
-
     delete:
       summary: Delete task
       security:
@@ -239,12 +399,10 @@ paths:
       responses:
         '200':
           description: Task deleted
-        '403':
-          description: Forbidden
 
   /tasks/{id}/status:
     patch:
-      summary: Quick update task status
+      summary: Update task status with activity logging
       security:
         - BearerAuth: []
       parameters:
@@ -268,18 +426,208 @@ paths:
         '200':
           description: Status updated
 
-  /tasks/stats:
+  /tasks/{id}/reorder:
+    patch:
+      summary: Update Kanban position within column
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [position]
+              properties:
+                position:
+                  type: integer
+                status:
+                  type: string
+                  enum: [todo, in-progress, done]
+      responses:
+        '200':
+          description: Position updated
+
+  /tasks/{id}/block:
+    post:
+      summary: Toggle blocker flag and reason
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [is_blocked]
+              properties:
+                is_blocked:
+                  type: boolean
+                blocker_reason:
+                  type: string
+      responses:
+        '200':
+          description: Blocker status updated
+
+  /tasks/{id}/subtasks:
+    post:
+      summary: Add subtask under parent task
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                priority:
+                  type: string
+                  enum: [low, medium, high]
+                  default: medium
+                due_date:
+                  type: string
+                  format: date
+      responses:
+        '201':
+          description: Subtask created
+
+  /tasks/{id}/comments:
+    post:
+      summary: Post a comment on a task discussion feed
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body:
+                  type: string
+                  example: Finished staging verification, ready for QA review.
+      responses:
+        '201':
+          description: Comment created
+
+  /tasks/{id}/comments/{comment_id}:
+    delete:
+      summary: Delete discussion comment (author or admin)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: comment_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Comment deleted
+
+  /search:
     get:
-      summary: Aggregate dashboard metrics
+      summary: Global Command Palette multi-entity fuzzy search
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Unified matches across tasks, projects, and users
+
+  /notifications:
+    get:
+      summary: List user notifications and unread badge count
       security:
         - BearerAuth: []
       responses:
         '200':
-          description: Task counts (total, todo, in_progress, done, high_priority, overdue)
+          description: Notifications feed with unread count
+
+  /notifications/{id}/read:
+    patch:
+      summary: Mark single notification as read
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Notification marked read
+
+  /notifications/read-all:
+    post:
+      summary: Mark all user notifications as read
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: All marked read
+
+  /reports/overview:
+    get:
+      summary: Executive project metrics, velocity, and workload distribution
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Aggregated KPI metrics, velocity chart data, member workload breakdown
+
+  /reports/export:
+    get:
+      summary: Stream CSV export of tasks with filters
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Streamed text/csv attachment
 
   /ai/suggest:
     post:
-      summary: AI-assisted task classification and priority suggestion
+      summary: AI task classification and priority suggestion
       security:
         - BearerAuth: []
       requestBody:
@@ -292,12 +640,73 @@ paths:
               properties:
                 title:
                   type: string
-                  example: Urgent server reboot before midnight
                 description:
                   type: string
       responses:
         '200':
-          description: AI classification suggestion
+          description: Priority and suggested labels
+
+  /ai/subtasks:
+    post:
+      summary: AI decomposition of task into checklist subtasks
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Array of generated actionable subtasks
+
+  /ai/improve-description:
+    post:
+      summary: AI expansion and polishing of task acceptance criteria
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Professional description draft with acceptance criteria
+
+  /ai/natural-task:
+    post:
+      summary: Parse natural language prompt into structured task attributes
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prompt]
+              properties:
+                prompt:
+                  type: string
+                  example: "Deploy Nginx security patches by Friday, high priority, assign to Michael"
+      responses:
+        '200':
+          description: Structured preview payload with title, priority, due_date, and assignee
 
   /admin/users:
     get:
@@ -310,14 +719,51 @@ paths:
         '403':
           description: Admin role required
 
+  /admin/users/{id}/role:
+    patch:
+      summary: Change user role (Admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role:
+                  type: string
+                  enum: [admin, user]
+      responses:
+        '200':
+          description: Role updated
+
   /admin/audit-logs:
     get:
-      summary: Paginated administrative audit logs
+      summary: Paginated administrative audit logs with action and actor filtering
       security:
         - BearerAuth: []
       responses:
         '200':
           description: Audit logs collection
+        '403':
+          description: Admin role required
+
+  /admin/system-health:
+    get:
+      summary: Detailed internal system diagnostic dashboard (Admin only)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: PHP version, Laravel version, database stats, queue driver, cache driver, tables
         '403':
           description: Admin role required
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useOutletContext } from 'react-router-dom';
 import { taskService } from '../services/taskService';
-import { adminService } from '../services/adminService';
+import { projectService } from '../services/projectService';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useDebounce } from '../hooks/useDebounce';
@@ -10,418 +10,480 @@ import PriorityBadge from '../components/PriorityBadge';
 import Pagination from '../components/Pagination';
 import EmptyState from '../components/EmptyState';
 import ConfirmModal from '../components/ConfirmModal';
-import TaskFormModal from '../components/TaskFormModal';
-import LoadingSkeleton from '../components/LoadingSkeleton';
 
 export default function TasksPage() {
   const { user, isAdmin } = useAuth();
-  const { showToast } = useToast();
+  const { addToast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
+  const outletContext = useOutletContext();
 
-  // Query & Filter states
+  // Active View Mode: list, board, calendar, timeline
+  const [viewMode, setViewMode] = useState(searchParams.get('view') || 'list');
+
+  // Filters state
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
-  const debouncedSearch = useDebounce(searchInput, 350);
-
+  const debouncedSearch = useDebounce(searchInput, 300);
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '');
   const [priorityFilter, setPriorityFilter] = useState(searchParams.get('priority') || '');
-  const [dueDateFilter, setDueDateFilter] = useState(searchParams.get('due_date') || '');
-  const [ownerFilter, setOwnerFilter] = useState(searchParams.get('user_id') || '');
-  const [sortBy, setSortBy] = useState(searchParams.get('sort_by') || 'created_at');
-  const [sortOrder, setSortOrder] = useState(searchParams.get('sort_order') || 'desc');
+  const [projectFilter, setProjectFilter] = useState(searchParams.get('project_id') || '');
+  const [quickPreset, setQuickPreset] = useState(searchParams.get('preset') || '');
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
 
   // Data states
   const [tasks, setTasks] = useState([]);
   const [meta, setMeta] = useState(null);
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [systemUsers, setSystemUsers] = useState([]);
 
-  // Modals state
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState(null);
+  // Bulk selection
+  const [selectedTaskIds, setSelectedTaskIds] = useState([]);
+
+  // Drag and Drop state
+  const [draggingTaskId, setDraggingTaskId] = useState(null);
+  const [dragOverColumn, setDragOverColumn] = useState(null);
+
+  // Calendar month state
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  // Delete modal state
   const [deletingTask, setDeletingTask] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Load admin user list once if admin
+  // Load project list once
   useEffect(() => {
-    if (isAdmin) {
-      adminService.getUsers()
-        .then(setSystemUsers)
-        .catch(() => {});
-    }
-  }, [isAdmin]);
-
-  // Sync state with URL search parameters
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (debouncedSearch) params.set('search', debouncedSearch);
-    if (statusFilter) params.set('status', statusFilter);
-    if (priorityFilter) params.set('priority', priorityFilter);
-    if (dueDateFilter) params.set('due_date', dueDateFilter);
-    if (ownerFilter) params.set('user_id', ownerFilter);
-    if (sortBy !== 'created_at') params.set('sort_by', sortBy);
-    if (sortOrder !== 'desc') params.set('sort_order', sortOrder);
-    if (currentPage > 1) params.set('page', String(currentPage));
-
-    setSearchParams(params, { replace: true });
-  }, [debouncedSearch, statusFilter, priorityFilter, dueDateFilter, ownerFilter, sortBy, sortOrder, currentPage, setSearchParams]);
+    projectService.getProjects()
+      .then(setProjects)
+      .catch((err) => console.error('Failed to load projects:', err));
+  }, []);
 
   // Fetch tasks
   const fetchTasks = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const params = {
+        view_mode: viewMode,
         page: currentPage,
-        per_page: 10,
-        sort_by: sortBy,
-        sort_order: sortOrder,
+        per_page: viewMode === 'list' ? 15 : 100,
       };
 
       if (debouncedSearch) params.search = debouncedSearch;
       if (statusFilter) params.status = statusFilter;
       if (priorityFilter) params.priority = priorityFilter;
-      if (dueDateFilter) params.due_date = dueDateFilter;
-      if (ownerFilter) params.user_id = ownerFilter;
+      if (projectFilter) params.project_id = projectFilter;
 
-      const response = await taskService.getTasks(params);
-      setTasks(response.data || []);
-      setMeta(response.meta || null);
-    } catch {
-      showToast('Failed to fetch tasks.', 'danger');
+      if (quickPreset === 'my-work') params.assignee_id = user?.id;
+      if (quickPreset === 'overdue') params.overdue = 'true';
+      if (quickPreset === 'this-week') params.this_week = 'true';
+      if (quickPreset === 'blocked') params.is_blocked = 'true';
+
+      const res = await taskService.getTasks(params);
+      if (Array.isArray(res.data)) {
+        setTasks(res.data);
+        setMeta(res.meta || null);
+      } else {
+        setTasks(res || []);
+      }
+    } catch (err) {
+      addToast('Failed to load tasks', 'danger');
     } finally {
       setLoading(false);
     }
-  }, [currentPage, debouncedSearch, statusFilter, priorityFilter, dueDateFilter, ownerFilter, sortBy, sortOrder, showToast]);
+  }, [viewMode, currentPage, debouncedSearch, statusFilter, priorityFilter, projectFilter, quickPreset, user, addToast]);
 
   useEffect(() => {
     fetchTasks();
-  }, [fetchTasks]);
+  }, [fetchTasks, outletContext?.refreshTrigger]);
 
-  // Reset page to 1 when filters change
-  const handleFilterChange = (setter, value) => {
-    setter(value);
+  // Sync view mode in URL
+  const handleViewModeChange = (mode) => {
+    setViewMode(mode);
+    searchParams.set('view', mode);
+    setSearchParams(searchParams);
+  };
+
+  const handleOpenTask = (taskId) => {
+    searchParams.set('task', String(taskId));
+    setSearchParams(searchParams);
+  };
+
+  // Quick Preset Selection
+  const handlePresetChange = (preset) => {
+    setQuickPreset(preset);
     setCurrentPage(1);
   };
 
-  const handleClearFilters = () => {
-    setSearchInput('');
-    setStatusFilter('');
-    setPriorityFilter('');
-    setDueDateFilter('');
-    setOwnerFilter('');
-    setSortBy('created_at');
-    setSortOrder('desc');
-    setCurrentPage(1);
-  };
-
-  // Task CRUD operations
-  const handleSaveTask = async (data, id) => {
-    if (id) {
-      await taskService.updateTask(id, data);
-      showToast('Task updated successfully.', 'success');
+  // Bulk Selection Handlers
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedTaskIds(tasks.map((t) => t.id));
     } else {
-      await taskService.createTask(data);
-      showToast('Task created successfully.', 'success');
+      setSelectedTaskIds([]);
     }
-    fetchTasks();
   };
 
-  const handleQuickStatusChange = async (task, newStatus) => {
+  const handleSelectTask = (id) => {
+    setSelectedTaskIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkAction = async (action, value = null) => {
+    if (selectedTaskIds.length === 0) return;
     try {
-      // Optimistic update
-      setTasks((prev) =>
-        prev.map((t) => (t.id === task.id ? { ...t, status: newStatus } : t))
-      );
-      await taskService.updateStatus(task.id, newStatus);
-      showToast(`Task status changed to ${newStatus}.`, 'success');
+      await taskService.bulkAction(action, selectedTaskIds, value);
+      addToast(`Updated ${selectedTaskIds.length} tasks`, 'success');
+      setSelectedTaskIds([]);
       fetchTasks();
-    } catch {
-      showToast('Failed to change status. Reverting.', 'danger');
+    } catch (err) {
+      addToast('Bulk action failed', 'danger');
+    }
+  };
+
+  // Drag and drop handlers for Kanban Board
+  const handleDragStart = (e, taskId) => {
+    e.dataTransfer.setData('text/plain', String(taskId));
+    setDraggingTaskId(taskId);
+  };
+
+  const handleDragOver = (e, columnStatus) => {
+    e.preventDefault();
+    setDragOverColumn(columnStatus);
+  };
+
+  const handleDrop = async (e, targetStatus) => {
+    e.preventDefault();
+    setDragOverColumn(null);
+    const taskId = parseInt(e.dataTransfer.getData('text/plain'), 10);
+    if (!taskId) return;
+
+    // Optimistic UI update
+    setTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, status: targetStatus } : t))
+    );
+
+    try {
+      await taskService.updateStatus(taskId, targetStatus);
+      addToast(`Task moved to ${targetStatus}`, 'success');
+    } catch (err) {
+      addToast('Failed to update task status. Reverting.', 'danger');
       fetchTasks();
     }
   };
 
   const handleDeleteConfirm = async () => {
     if (!deletingTask) return;
+    setIsDeleting(true);
     try {
-      setIsDeleting(true);
       await taskService.deleteTask(deletingTask.id);
-      showToast('Task deleted successfully.', 'success');
+      addToast('Task deleted successfully', 'success');
       setDeletingTask(null);
       fetchTasks();
-    } catch {
-      showToast('Failed to delete task.', 'danger');
+    } catch (err) {
+      addToast('Failed to delete task', 'danger');
     } finally {
       setIsDeleting(false);
     }
   };
 
-  const hasActiveFilters = Boolean(searchInput || statusFilter || priorityFilter || dueDateFilter || ownerFilter);
+  // Calendar calculations
+  const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+  const getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
+
+  const calYear = currentDate.getFullYear();
+  const calMonth = currentDate.getMonth();
+  const totalDays = getDaysInMonth(calYear, calMonth);
+  const firstDay = getFirstDayOfMonth(calYear, calMonth);
 
   return (
     <div>
-      {/* Top Header */}
+      {/* Header with Title and View Switcher */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
-          <h2 className="fw-bold text-dark mb-1">Task Management</h2>
+          <h2 className="fw-bold mb-1" style={{ fontSize: '1.5rem' }}>Tasks</h2>
           <p className="text-muted small mb-0">
-            {isAdmin ? 'Manage all company tasks with administrative privileges.' : 'Organize, track, and complete your assigned tasks.'}
+            Work items across all active workspace projects.
           </p>
         </div>
-        <button
-          type="button"
-          className="btn btn-primary d-flex align-items-center gap-2 px-3 py-2 shadow-sm"
-          onClick={() => {
-            setEditingTask(null);
-            setIsFormModalOpen(true);
-          }}
-        >
-          <i className="bi bi-plus-lg"></i>
-          <span>Create Task</span>
-        </button>
+
+        {/* View Switcher Controls */}
+        <div className="btn-group shadow-sm bg-surface p-1 border rounded" style={{ backgroundColor: 'var(--tf-bg-surface)' }}>
+          <button
+            type="button"
+            className={`btn btn-sm ${viewMode === 'list' ? 'btn-primary' : 'btn-light border-0'}`}
+            onClick={() => handleViewModeChange('list')}
+            title="Table View"
+          >
+            <i className="bi bi-table me-1"></i> List
+          </button>
+          <button
+            type="button"
+            className={`btn btn-sm ${viewMode === 'board' ? 'btn-primary' : 'btn-light border-0'}`}
+            onClick={() => handleViewModeChange('board')}
+            title="Kanban Board View"
+          >
+            <i className="bi bi-kanban me-1"></i> Board
+          </button>
+          <button
+            type="button"
+            className={`btn btn-sm ${viewMode === 'calendar' ? 'btn-primary' : 'btn-light border-0'}`}
+            onClick={() => handleViewModeChange('calendar')}
+            title="Calendar View"
+          >
+            <i className="bi bi-calendar3 me-1"></i> Calendar
+          </button>
+          <button
+            type="button"
+            className={`btn btn-sm ${viewMode === 'timeline' ? 'btn-primary' : 'btn-light border-0'}`}
+            onClick={() => handleViewModeChange('timeline')}
+            title="Timeline / Gantt View"
+          >
+            <i className="bi bi-bar-chart-steps me-1"></i> Timeline
+          </button>
+        </div>
       </div>
 
-      {/* Filter and Search Bar Card */}
-      <div className="card shadow-sm mb-4 border p-3">
-        <div className="row g-3 align-items-center">
+      {/* Filter and Presets Bar */}
+      <div className="tf-card mb-4 p-3">
+        <div className="row g-2 align-items-center">
           {/* Search box */}
-          <div className="col-12 col-md-4">
-            <div className="input-group">
-              <span className="input-group-text bg-white border-end-0 text-muted">
+          <div className="col-12 col-md-3">
+            <div className="input-group input-group-sm">
+              <span className="input-group-text bg-transparent border-end-0 text-muted">
                 <i className="bi bi-search"></i>
               </span>
               <input
                 type="text"
                 className="form-control border-start-0 ps-0"
-                placeholder="Search title or description..."
+                placeholder="Search tasks..."
                 value={searchInput}
-                onChange={(e) => {
-                  setSearchInput(e.target.value);
-                  setCurrentPage(1);
-                }}
-                aria-label="Search tasks"
+                onChange={(e) => setSearchInput(e.target.value)}
               />
-              {searchInput && (
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary border-start-0 border"
-                  onClick={() => setSearchInput('')}
-                  aria-label="Clear search"
-                >
-                  <i className="bi bi-x"></i>
-                </button>
-              )}
             </div>
           </div>
 
-          {/* Status Select */}
+          {/* Project Filter */}
           <div className="col-6 col-md-2">
             <select
-              className="form-select"
+              className="form-select form-select-sm"
+              value={projectFilter}
+              onChange={(e) => setProjectFilter(e.target.value)}
+            >
+              <option value="">All Projects</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.key} — {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Status Filter */}
+          <div className="col-6 col-md-2">
+            <select
+              className="form-select form-select-sm"
               value={statusFilter}
-              onChange={(e) => handleFilterChange(setStatusFilter, e.target.value)}
-              aria-label="Filter by status"
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
               <option value="">All Statuses</option>
-              <option value="todo">To Do</option>
+              <option value="todo">Todo</option>
               <option value="in-progress">In Progress</option>
-              <option value="done">Completed</option>
+              <option value="done">Done</option>
             </select>
           </div>
 
-          {/* Priority Select */}
+          {/* Priority Filter */}
           <div className="col-6 col-md-2">
             <select
-              className="form-select"
+              className="form-select form-select-sm"
               value={priorityFilter}
-              onChange={(e) => handleFilterChange(setPriorityFilter, e.target.value)}
-              aria-label="Filter by priority"
+              onChange={(e) => setPriorityFilter(e.target.value)}
             >
               <option value="">All Priorities</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
+              <option value="high">High Priority</option>
+              <option value="medium">Medium Priority</option>
+              <option value="low">Low Priority</option>
             </select>
           </div>
 
-          {/* Sort By Select */}
-          <div className="col-6 col-md-2">
-            <select
-              className="form-select"
-              value={`${sortBy}:${sortOrder}`}
-              onChange={(e) => {
-                const [sb, so] = e.target.value.split(':');
-                setSortBy(sb);
-                setSortOrder(so);
-                setCurrentPage(1);
-              }}
-              aria-label="Sort tasks by"
+          {/* Preset Buttons */}
+          <div className="col-12 col-md-3 d-flex gap-1 justify-content-md-end flex-wrap">
+            <button
+              className={`btn btn-sm ${quickPreset === 'my-work' ? 'btn-primary' : 'btn-outline-secondary'}`}
+              onClick={() => handlePresetChange(quickPreset === 'my-work' ? '' : 'my-work')}
+              style={{ fontSize: '0.75rem' }}
             >
-              <option value="created_at:desc">Newest First</option>
-              <option value="created_at:asc">Oldest First</option>
-              <option value="due_date:asc">Earliest Due Date</option>
-              <option value="due_date:desc">Latest Due Date</option>
-            </select>
+              My Tasks
+            </button>
+            <button
+              className={`btn btn-sm ${quickPreset === 'overdue' ? 'btn-danger' : 'btn-outline-secondary'}`}
+              onClick={() => handlePresetChange(quickPreset === 'overdue' ? '' : 'overdue')}
+              style={{ fontSize: '0.75rem' }}
+            >
+              Overdue
+            </button>
+            <button
+              className={`btn btn-sm ${quickPreset === 'blocked' ? 'btn-warning' : 'btn-outline-secondary'}`}
+              onClick={() => handlePresetChange(quickPreset === 'blocked' ? '' : 'blocked')}
+              style={{ fontSize: '0.75rem' }}
+            >
+              Blocked
+            </button>
           </div>
-
-          {/* Admin Owner Filter */}
-          {isAdmin && (
-            <div className="col-6 col-md-2">
-              <select
-                className="form-select"
-                value={ownerFilter}
-                onChange={(e) => handleFilterChange(setOwnerFilter, e.target.value)}
-                aria-label="Filter by task owner"
-              >
-                <option value="">All Owners</option>
-                {systemUsers.map((u) => (
-                  <option key={u.id} value={u.id}>{u.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
         </div>
 
-        {/* Active Filters Pill Bar */}
-        {hasActiveFilters && (
-          <div className="d-flex align-items-center gap-2 mt-3 pt-3 border-top small flex-wrap">
-            <span className="text-muted fw-semibold">Active Filters:</span>
-            {debouncedSearch && <span className="badge bg-light text-dark border">Search: "{debouncedSearch}"</span>}
-            {statusFilter && <span className="badge bg-light text-dark border">Status: {statusFilter}</span>}
-            {priorityFilter && <span className="badge bg-light text-dark border">Priority: {priorityFilter}</span>}
-            {dueDateFilter && <span className="badge bg-light text-dark border">Due: {dueDateFilter}</span>}
-            {ownerFilter && <span className="badge bg-light text-dark border">Owner ID: #{ownerFilter}</span>}
-            <button
-              type="button"
-              className="btn btn-link btn-sm text-danger p-0 ms-2 text-decoration-none"
-              onClick={handleClearFilters}
-            >
-              <i className="bi bi-x-circle me-1"></i> Reset All
-            </button>
+        {/* Bulk Action Strip */}
+        {selectedTaskIds.length > 0 && (
+          <div className="d-flex align-items-center justify-content-between p-2 mt-3 bg-light rounded border small">
+            <div className="fw-semibold">
+              <i className="bi bi-check2-square text-primary me-2"></i>
+              {selectedTaskIds.length} tasks selected
+            </div>
+            <div className="d-flex align-items-center gap-2">
+              <select
+                className="form-select form-select-sm"
+                style={{ width: '130px' }}
+                onChange={(e) => e.target.value && handleBulkAction('status', e.target.value)}
+                defaultValue=""
+              >
+                <option value="" disabled>Set Status...</option>
+                <option value="todo">Todo</option>
+                <option value="in-progress">In Progress</option>
+                <option value="done">Done</option>
+              </select>
+
+              <select
+                className="form-select form-select-sm"
+                style={{ width: '130px' }}
+                onChange={(e) => e.target.value && handleBulkAction('priority', e.target.value)}
+                defaultValue=""
+              >
+                <option value="" disabled>Set Priority...</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+
+              <button
+                className="btn btn-sm btn-outline-danger"
+                onClick={() => handleBulkAction('delete')}
+              >
+                Delete Selected
+              </button>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Main Task List Table / Cards */}
-      <div className="card shadow-sm border">
-        <div className="card-body p-0">
+      {/* VIEW 1: DENSE TABLE / LIST VIEW */}
+      {viewMode === 'list' && (
+        <div className="tf-card overflow-hidden">
           {loading ? (
-            <div className="p-4"><LoadingSkeleton count={5} /></div>
+            <div className="p-5 text-center text-muted">
+              <div className="spinner-border spinner-border-sm text-primary me-2"></div>Loading tasks...
+            </div>
           ) : tasks.length === 0 ? (
             <EmptyState
-              icon="bi-check2-circle"
-              title="No tasks match your criteria"
-              message={hasActiveFilters ? 'Try adjusting your search terms or filter selections.' : 'You have no tasks created yet. Click below to add your first task!'}
-              actionText={hasActiveFilters ? 'Clear Filters' : 'Create Task'}
-              onAction={hasActiveFilters ? handleClearFilters : () => setIsFormModalOpen(true)}
+              icon="bi-list-task"
+              title="No tasks match the filter"
+              message="Try changing the status, priority, or search filters above."
             />
           ) : (
             <div className="table-responsive">
-              <table className="table table-hover align-middle mb-0">
-                <thead className="table-light text-muted small text-uppercase">
+              <table className="tf-table">
+                <thead>
                   <tr>
-                    <th scope="col" style={{ width: '48px' }} className="text-center">Done</th>
-                    <th scope="col">Task Details</th>
-                    <th scope="col" style={{ width: '130px' }}>Status</th>
-                    <th scope="col" style={{ width: '110px' }}>Priority</th>
-                    <th scope="col" style={{ width: '140px' }}>Due Date</th>
-                    {isAdmin && <th scope="col" style={{ width: '150px' }}>Owner</th>}
-                    <th scope="col" style={{ width: '110px' }} className="text-end">Actions</th>
+                    <th style={{ width: '38px' }} className="text-center">
+                      <input
+                        type="checkbox"
+                        className="form-check-input mt-0"
+                        onChange={handleSelectAll}
+                        checked={selectedTaskIds.length === tasks.length && tasks.length > 0}
+                      />
+                    </th>
+                    <th style={{ width: '90px' }}>Key</th>
+                    <th>Title & Project</th>
+                    <th style={{ width: '120px' }}>Status</th>
+                    <th style={{ width: '100px' }}>Priority</th>
+                    <th style={{ width: '130px' }}>Assignee</th>
+                    <th style={{ width: '120px' }}>Due Date</th>
+                    <th style={{ width: '80px' }} className="text-end">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tasks.map((task) => {
-                    const isDone = task.status === 'done';
-
+                    const isSelected = selectedTaskIds.includes(task.id);
                     return (
-                      <tr key={task.id}>
-                        {/* Checkbox for quick completion toggle */}
-                        <td className="text-center">
+                      <tr
+                        key={task.id}
+                        className={isSelected ? 'table-active' : ''}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => handleOpenTask(task.id)}
+                      >
+                        <td className="text-center" onClick={(e) => e.stopPropagation()}>
                           <input
                             type="checkbox"
-                            className="form-check-input"
-                            checked={isDone}
-                            onChange={() => handleQuickStatusChange(task, isDone ? 'todo' : 'done')}
-                            title={`Mark as ${isDone ? 'incomplete' : 'completed'}`}
-                            aria-label={`Toggle completion for ${task.title}`}
+                            className="form-check-input mt-0"
+                            checked={isSelected}
+                            onChange={() => handleSelectTask(task.id)}
                           />
                         </td>
-
-                        {/* Title & Description */}
                         <td>
-                          <div className={`fw-semibold ${isDone ? 'text-decoration-line-through text-muted' : 'text-dark'}`}>
-                            {task.title}
+                          <span className="badge bg-secondary font-monospace" style={{ fontSize: '0.75rem' }}>
+                            {task.task_key || `TASK-${task.id}`}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="d-flex align-items-center gap-2">
+                            <span className="fw-semibold text-truncate" style={{ maxWidth: '380px' }}>
+                              {task.title}
+                            </span>
+                            {task.is_blocked && (
+                              <span className="badge bg-danger-subtle text-danger" style={{ fontSize: '0.65rem' }}>
+                                <i className="bi bi-flag-fill me-1"></i>BLOCKED
+                              </span>
+                            )}
                           </div>
-                          {task.description && (
-                            <div className="small text-muted text-truncate" style={{ maxWidth: '420px' }}>
-                              {task.description}
+                          {task.project && (
+                            <div className="d-flex align-items-center gap-1 mt-1 text-muted" style={{ fontSize: '0.72rem' }}>
+                              <span
+                                className="rounded-circle d-inline-block"
+                                style={{ width: '6px', height: '6px', backgroundColor: task.project.color }}
+                              ></span>
+                              <span>{task.project.name}</span>
                             </div>
                           )}
                         </td>
-
-                        {/* Status Select dropdown */}
                         <td>
-                          <select
-                            className="form-select form-select-sm border-0 bg-transparent fw-medium"
-                            value={task.status}
-                            onChange={(e) => handleQuickStatusChange(task, e.target.value)}
-                            aria-label="Change status"
-                          >
-                            <option value="todo">To Do</option>
-                            <option value="in-progress">In Progress</option>
-                            <option value="done">Completed</option>
-                          </select>
+                          <StatusBadge status={task.status} />
                         </td>
-
-                        {/* Priority Badge */}
                         <td>
                           <PriorityBadge priority={task.priority} />
                         </td>
-
-                        {/* Due Date with Overdue Indicator */}
+                        <td>
+                          <div className="d-flex align-items-center gap-1 small text-truncate">
+                            <div className="avatar-circle" style={{ width: '22px', height: '22px', fontSize: '0.65rem' }}>
+                              {task.assignee ? task.assignee.name[0] : 'U'}
+                            </div>
+                            <span className="text-truncate">{task.assignee?.name || 'Unassigned'}</span>
+                          </div>
+                        </td>
                         <td>
                           {task.due_date ? (
-                            <span className={`small ${task.is_overdue ? 'badge badge-overdue' : 'text-secondary'}`}>
-                              <i className="bi bi-calendar3 me-1"></i> {task.due_date}
+                            <span className={`small ${task.is_overdue ? 'text-danger fw-bold' : 'text-muted'}`}>
+                              <i className="bi bi-calendar3 me-1"></i>{task.due_date}
                             </span>
                           ) : (
-                            <span className="small text-muted">—</span>
+                            <span className="text-muted small">—</span>
                           )}
                         </td>
-
-                        {/* Admin Owner Column */}
-                        {isAdmin && (
-                          <td>
-                            <div className="small fw-medium text-dark">{task.user?.name || `User #${task.user_id}`}</div>
-                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>{task.user?.email}</div>
-                          </td>
-                        )}
-
-                        {/* Actions (Edit / Delete) */}
-                        <td className="text-end">
-                          <div className="btn-group btn-group-sm">
-                            <button
-                              type="button"
-                              className="btn btn-outline-secondary btn-sm"
-                              onClick={() => {
-                                setEditingTask(task);
-                                setIsFormModalOpen(true);
-                              }}
-                              title="Edit task details"
-                              aria-label={`Edit ${task.title}`}
-                            >
-                              <i className="bi bi-pencil"></i>
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-outline-danger btn-sm"
-                              onClick={() => setDeletingTask(task)}
-                              title="Delete task"
-                              aria-label={`Delete ${task.title}`}
-                            >
-                              <i className="bi bi-trash"></i>
-                            </button>
-                          </div>
+                        <td className="text-end" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            className="btn btn-sm btn-link text-danger p-0"
+                            onClick={() => setDeletingTask(task)}
+                            title="Delete task"
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
                         </td>
                       </tr>
                     );
@@ -430,34 +492,215 @@ export default function TasksPage() {
               </table>
             </div>
           )}
+
+          {meta && meta.last_page > 1 && (
+            <div className="p-3 border-top">
+              <Pagination meta={meta} onPageChange={(p) => setCurrentPage(p)} />
+            </div>
+          )}
         </div>
+      )}
 
-        {/* Pagination Footer */}
-        {meta && (
-          <div className="p-3 bg-white">
-            <Pagination meta={meta} onPageChange={(p) => setCurrentPage(p)} />
+      {/* VIEW 2: DRAG-AND-DROP KANBAN BOARD */}
+      {viewMode === 'board' && (
+        <div className="kanban-board">
+          {['todo', 'in-progress', 'done'].map((columnStatus) => {
+            const colTasks = tasks.filter((t) => t.status === columnStatus);
+            const isColOver = dragOverColumn === columnStatus;
+
+            return (
+              <div
+                key={columnStatus}
+                className={`kanban-column ${isColOver ? 'drag-over' : ''}`}
+                onDragOver={(e) => handleDragOver(e, columnStatus)}
+                onDrop={(e) => handleDrop(e, columnStatus)}
+              >
+                {/* Column Header */}
+                <div className="kanban-column-header">
+                  <div className="d-flex align-items-center gap-2">
+                    <span className="text-uppercase" style={{ letterSpacing: '0.04em' }}>
+                      {columnStatus === 'todo' && 'To Do'}
+                      {columnStatus === 'in-progress' && 'In Progress'}
+                      {columnStatus === 'done' && 'Done'}
+                    </span>
+                    <span className="badge rounded-pill bg-secondary" style={{ fontSize: '0.7rem' }}>
+                      {colTasks.length}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Cards List */}
+                <div className="kanban-column-tasks">
+                  {colTasks.map((t) => (
+                    <div
+                      key={t.id}
+                      className="kanban-card"
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, t.id)}
+                      onClick={() => handleOpenTask(t.id)}
+                    >
+                      <div className="d-flex align-items-center justify-content-between mb-2">
+                        <span className="badge bg-secondary font-monospace" style={{ fontSize: '0.7rem' }}>
+                          {t.task_key || `TASK-${t.id}`}
+                        </span>
+                        <PriorityBadge priority={t.priority} />
+                      </div>
+
+                      <div className="fw-semibold small mb-2 text-truncate" style={{ maxWidth: '280px' }}>
+                        {t.title}
+                      </div>
+
+                      {t.is_blocked && (
+                        <div className="badge bg-danger-subtle text-danger mb-2 p-1 w-100 text-start">
+                          <i className="bi bi-flag-fill me-1"></i>BLOCKED: {t.blocker_reason || 'Pending resolution'}
+                        </div>
+                      )}
+
+                      <div className="d-flex align-items-center justify-content-between pt-2 border-top text-muted" style={{ fontSize: '0.7rem' }}>
+                        <div className="d-flex align-items-center gap-1">
+                          <div className="avatar-circle" style={{ width: '18px', height: '18px', fontSize: '0.6rem' }}>
+                            {t.assignee ? t.assignee.name[0] : 'U'}
+                          </div>
+                          <span>{t.assignee?.name || 'Unassigned'}</span>
+                        </div>
+
+                        {t.due_date && (
+                          <span className={t.is_overdue ? 'text-danger fw-bold' : ''}>
+                            <i className="bi bi-clock me-1"></i>{t.due_date}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {colTasks.length === 0 && (
+                    <div className="text-center py-4 text-muted small border border-dashed rounded p-3">
+                      Drop tasks here
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* VIEW 3: INTERACTIVE MONTHLY CALENDAR GRID */}
+      {viewMode === 'calendar' && (
+        <div className="calendar-container">
+          <div className="calendar-header">
+            <h5 className="fw-bold mb-0">
+              {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+            </h5>
+            <div className="btn-group btn-group-sm">
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => setCurrentDate(new Date(calYear, calMonth - 1, 1))}
+              >
+                <i className="bi bi-chevron-left"></i>
+              </button>
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => setCurrentDate(new Date())}
+              >
+                Today
+              </button>
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => setCurrentDate(new Date(calYear, calMonth + 1, 1))}
+              >
+                <i className="bi bi-chevron-right"></i>
+              </button>
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* Create / Edit Modal */}
-      <TaskFormModal
-        isOpen={isFormModalOpen}
-        onClose={() => {
-          setIsFormModalOpen(false);
-          setEditingTask(null);
-        }}
-        onSave={handleSaveTask}
-        task={editingTask}
-        users={systemUsers}
-        isAdmin={isAdmin}
-      />
+          <div className="calendar-grid">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
+              <div key={d} className="calendar-day-header">{d}</div>
+            ))}
+
+            {/* Empty offset days */}
+            {Array.from({ length: firstDay }).map((_, idx) => (
+              <div key={`empty-${idx}`} className="calendar-cell other-month"></div>
+            ))}
+
+            {/* Days in Month */}
+            {Array.from({ length: totalDays }).map((_, idx) => {
+              const dayNum = idx + 1;
+              const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+              const dayTasks = tasks.filter((t) => t.due_date === dateStr);
+              const isToday = new Date().toDateString() === new Date(calYear, calMonth, dayNum).toDateString();
+
+              return (
+                <div key={dayNum} className={`calendar-cell ${isToday ? 'today' : ''}`}>
+                  <div className="calendar-cell-date">{dayNum}</div>
+                  {dayTasks.map((t) => (
+                    <div
+                      key={t.id}
+                      className="calendar-task-chip"
+                      onClick={() => handleOpenTask(t.id)}
+                      title={`${t.task_key}: ${t.title}`}
+                    >
+                      <span className="fw-semibold me-1">{t.task_key || 'TASK'}:</span>
+                      {t.title}
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* VIEW 4: TIMELINE / GANTT VIEW */}
+      {viewMode === 'timeline' && (
+        <div className="timeline-container">
+          <div className="fw-semibold small text-muted text-uppercase mb-3">
+            Schedule Overview & Deliverable Timeline
+          </div>
+
+          <div className="d-flex flex-column gap-2">
+            {tasks.map((task) => (
+              <div key={task.id} className="timeline-row">
+                <div className="timeline-task-info">
+                  <div className="fw-semibold small text-truncate" style={{ cursor: 'pointer' }} onClick={() => handleOpenTask(task.id)}>
+                    <span className="badge bg-secondary font-monospace me-1" style={{ fontSize: '0.65rem' }}>
+                      {task.task_key || `TASK-${task.id}`}
+                    </span>
+                    {task.title}
+                  </div>
+                  <div className="text-muted" style={{ fontSize: '0.68rem' }}>
+                    {task.due_date ? `Due: ${task.due_date}` : 'No due date'}
+                  </div>
+                </div>
+
+                <div className="timeline-bar-area" onClick={() => handleOpenTask(task.id)} style={{ cursor: 'pointer' }}>
+                  <div
+                    className="timeline-bar"
+                    style={{
+                      left: '10%',
+                      width: task.status === 'done' ? '80%' : task.status === 'in-progress' ? '50%' : '25%',
+                      backgroundColor: task.project?.color || 'var(--tf-primary)',
+                    }}
+                  >
+                    <span>{task.title}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {tasks.length === 0 && (
+              <div className="text-center py-5 text-muted small">No scheduled timeline items found.</div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={Boolean(deletingTask)}
         title="Delete Task"
-        message={`Are you sure you want to permanently delete "${deletingTask?.title}"? This action cannot be undone.`}
+        message={`Are you sure you want to delete "${deletingTask?.title}"?`}
         confirmText="Yes, Delete"
         isLoading={isDeleting}
         onConfirm={handleDeleteConfirm}

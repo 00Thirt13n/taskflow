@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { taskService } from '../services/taskService';
+import { projectService } from '../services/projectService';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import StatusBadge from '../components/StatusBadge';
 import PriorityBadge from '../components/PriorityBadge';
-import TaskFormModal from '../components/TaskFormModal';
-import LoadingSkeleton from '../components/LoadingSkeleton';
 
 export default function DashboardPage() {
-  const { user, isAdmin } = useAuth();
-  const { showToast } = useToast();
+  const { user } = useAuth();
+  const { addToast } = useToast();
+  const [, setSearchParams] = useSearchParams();
 
   const [stats, setStats] = useState({
     total: 0,
@@ -18,47 +18,48 @@ export default function DashboardPage() {
     in_progress: 0,
     done: 0,
     high_priority: 0,
+    blocked: 0,
     overdue: 0,
   });
 
   const [recentTasks, setRecentTasks] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
-      const [statsData, tasksData] = await Promise.all([
+      const [statsData, tasksData, projsData] = await Promise.all([
         taskService.getStats(),
-        taskService.getTasks({ per_page: 5, sort_by: 'created_at', sort_order: 'desc' }),
+        taskService.getTasks({ per_page: 6, sort_by: 'created_at', sort_order: 'desc' }),
+        projectService.getProjects(),
       ]);
-      setStats(statsData);
-      setRecentTasks(tasksData.data || []);
+      setStats(statsData || {});
+      setRecentTasks(tasksData.data || tasksData || []);
+      setProjects(projsData || []);
     } catch {
-      showToast('Failed to load dashboard metrics.', 'danger');
+      addToast('Failed to load dashboard metrics.', 'danger');
     } finally {
       setLoading(false);
     }
-  }, [showToast]);
+  }, [addToast]);
 
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  const handleCreateTask = async (data) => {
-    await taskService.createTask(data);
-    showToast('Task created successfully.', 'success');
-    fetchDashboardData();
+  const handleOpenTask = (taskId) => {
+    setSearchParams({ task: String(taskId) });
   };
 
   const handleQuickStatusToggle = async (task) => {
     const nextStatus = task.status === 'done' ? 'todo' : 'done';
     try {
       await taskService.updateStatus(task.id, nextStatus);
-      showToast(`Task marked as ${nextStatus === 'done' ? 'completed' : 'to do'}.`, 'success');
+      addToast(`Task marked as ${nextStatus === 'done' ? 'completed' : 'todo'}.`, 'success');
       fetchDashboardData();
     } catch {
-      showToast('Failed to update task status.', 'danger');
+      addToast('Failed to update task status.', 'danger');
     }
   };
 
@@ -69,34 +70,40 @@ export default function DashboardPage() {
       {/* Header Bar */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
-          <h2 className="fw-bold text-dark mb-1">
+          <h2 className="fw-bold mb-1" style={{ fontSize: '1.5rem' }}>
             Welcome back, {user?.name}
           </h2>
           <p className="text-muted small mb-0">
-            Here is your daily task distribution and upcoming deadlines overview.
+            Executive overview of workspace initiatives, deliverables, and team execution.
           </p>
         </div>
-        <button
-          type="button"
-          className="btn btn-primary d-flex align-items-center gap-2 px-3 py-2"
-          onClick={() => setIsModalOpen(true)}
-        >
-          <i className="bi bi-plus-lg"></i>
-          <span>Create Task</span>
-        </button>
+        <div className="d-flex align-items-center gap-2">
+          <Link to="/reports" className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 shadow-sm">
+            <i className="bi bi-bar-chart-line"></i>
+            <span>Analytics</span>
+          </Link>
+          <Link to="/tasks" className="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm">
+            <i className="bi bi-list-task"></i>
+            <span>View Tasks</span>
+          </Link>
+        </div>
       </div>
 
-      {/* Overdue Warning Alert if any overdue tasks exist */}
+      {/* Overdue Warning Alert */}
       {stats.overdue > 0 && (
-        <div className="alert alert-danger d-flex align-items-center justify-content-between p-3 mb-4 shadow-sm" role="alert">
-          <div className="d-flex align-items-center gap-2">
+        <div className="alert alert-danger d-flex align-items-center justify-content-between p-3 mb-4 border-0 rounded shadow-sm">
+          <div className="d-flex align-items-center gap-3">
             <i className="bi bi-exclamation-octagon-fill fs-4 text-danger"></i>
             <div>
-              <strong className="d-block">Attention Required: {stats.overdue} overdue task{stats.overdue > 1 ? 's' : ''}!</strong>
-              <span className="small text-danger-emphasis">Some tasks have exceeded their scheduled due dates.</span>
+              <strong className="d-block" style={{ fontSize: '0.875rem' }}>
+                Action Required: {stats.overdue} overdue deliverable{stats.overdue > 1 ? 's' : ''}!
+              </strong>
+              <span className="small text-danger-emphasis">
+                Deliverables have passed their scheduled target dates.
+              </span>
             </div>
           </div>
-          <Link to="/tasks?status=todo" className="btn btn-danger btn-sm text-nowrap">
+          <Link to="/tasks?preset=overdue" className="btn btn-danger btn-sm text-nowrap">
             Review Overdue
           </Link>
         </div>
@@ -105,70 +112,74 @@ export default function DashboardPage() {
       {/* 6 Key Performance Metric Cards */}
       <div className="row g-3 mb-4">
         <div className="col-6 col-lg-2">
-          <div className="card p-3 h-100 card-hover">
+          <Link to="/tasks" className="tf-card p-3 h-100 d-block text-decoration-none" style={{ color: 'inherit' }}>
             <div className="text-muted small fw-medium">Total Tasks</div>
-            <div className="fs-3 fw-bold text-dark mt-1">{loading ? '—' : stats.total}</div>
+            <div className="fs-3 fw-bold mt-1">{loading ? '—' : stats.total}</div>
             <div className="small text-muted mt-auto pt-2">
               <i className="bi bi-layers text-primary me-1"></i> Active scope
             </div>
-          </div>
+          </Link>
         </div>
 
         <div className="col-6 col-lg-2">
-          <div className="card p-3 h-100 card-hover">
+          <Link to="/tasks?status=todo" className="tf-card p-3 h-100 d-block text-decoration-none" style={{ color: 'inherit' }}>
             <div className="text-muted small fw-medium">To Do</div>
             <div className="fs-3 fw-bold text-secondary mt-1">{loading ? '—' : stats.todo}</div>
             <div className="small text-muted mt-auto pt-2">
-              <i className="bi bi-clock text-secondary me-1"></i> Not started
+              <i className="bi bi-clock text-secondary me-1"></i> Backlog
             </div>
-          </div>
+          </Link>
         </div>
 
         <div className="col-6 col-lg-2">
-          <div className="card p-3 h-100 card-hover">
+          <Link to="/tasks?status=in-progress" className="tf-card p-3 h-100 d-block text-decoration-none" style={{ color: 'inherit' }}>
             <div className="text-muted small fw-medium">In Progress</div>
             <div className="fs-3 fw-bold text-primary mt-1">{loading ? '—' : stats.in_progress}</div>
             <div className="small text-muted mt-auto pt-2">
-              <i className="bi bi-arrow-repeat text-primary me-1"></i> In execution
+              <i className="bi bi-arrow-repeat text-primary me-1"></i> Active execution
             </div>
-          </div>
+          </Link>
         </div>
 
         <div className="col-6 col-lg-2">
-          <div className="card p-3 h-100 card-hover">
+          <Link to="/tasks?status=done" className="tf-card p-3 h-100 d-block text-decoration-none" style={{ color: 'inherit' }}>
             <div className="text-muted small fw-medium">Completed</div>
             <div className="fs-3 fw-bold text-success mt-1">{loading ? '—' : stats.done}</div>
             <div className="small text-success mt-auto pt-2">
               <i className="bi bi-check-circle-fill me-1"></i> {completionPercentage}% finished
             </div>
-          </div>
+          </Link>
         </div>
 
         <div className="col-6 col-lg-2">
-          <div className="card p-3 h-100 card-hover">
-            <div className="text-muted small fw-medium">High Priority</div>
-            <div className="fs-3 fw-bold text-danger mt-1">{loading ? '—' : stats.high_priority}</div>
-            <div className="small text-danger mt-auto pt-2">
-              <i className="bi bi-fire me-1"></i> Critical focus
+          <Link to="/tasks?preset=blocked" className="tf-card p-3 h-100 d-block text-decoration-none" style={{ color: 'inherit' }}>
+            <div className="text-muted small fw-medium">Blocked</div>
+            <div className={`fs-3 fw-bold mt-1 ${stats.blocked > 0 ? 'text-warning' : 'text-muted'}`}>
+              {loading ? '—' : stats.blocked}
             </div>
-          </div>
-        </div>
-
-        <div className="col-6 col-lg-2">
-          <div className="card p-3 h-100 card-hover">
-            <div className="text-muted small fw-medium">Overdue</div>
-            <div className="fs-3 fw-bold text-danger mt-1">{loading ? '—' : stats.overdue}</div>
             <div className="small text-muted mt-auto pt-2">
-              <i className="bi bi-calendar-x text-danger me-1"></i> Past target
+              <i className="bi bi-flag-fill text-warning me-1"></i> Roadblocks
             </div>
-          </div>
+          </Link>
+        </div>
+
+        <div className="col-6 col-lg-2">
+          <Link to="/tasks?preset=overdue" className="tf-card p-3 h-100 d-block text-decoration-none" style={{ color: 'inherit' }}>
+            <div className="text-muted small fw-medium">Overdue</div>
+            <div className={`fs-3 fw-bold mt-1 ${stats.overdue > 0 ? 'text-danger' : 'text-muted'}`}>
+              {loading ? '—' : stats.overdue}
+            </div>
+            <div className="small text-muted mt-auto pt-2">
+              <i className="bi bi-calendar-x text-danger me-1"></i> Past due
+            </div>
+          </Link>
         </div>
       </div>
 
       {/* Progress Breakdown Bar */}
-      <div className="card p-4 mb-4 shadow-sm">
+      <div className="tf-card p-4 mb-4">
         <div className="d-flex justify-content-between align-items-center mb-2">
-          <span className="fw-semibold small text-dark">Overall Task Completion Rate</span>
+          <span className="fw-semibold small">Workspace Overall Completion Velocity</span>
           <span className="fw-bold small text-primary">{completionPercentage}%</span>
         </div>
         <div className="progress" style={{ height: '8px' }}>
@@ -176,111 +187,136 @@ export default function DashboardPage() {
             className="progress-bar bg-success"
             role="progressbar"
             style={{ width: `${completionPercentage}%` }}
-            aria-valuenow={completionPercentage}
-            aria-valuemin="0"
-            aria-valuemax="100"
           ></div>
         </div>
       </div>
 
-      {/* Recent Tasks Table */}
-      <div className="card shadow-sm">
-        <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-          <h5 className="card-title fw-bold mb-0 text-dark d-flex align-items-center gap-2">
-            <i className="bi bi-clock-history text-primary"></i> Recently Updated Tasks
-          </h5>
-          <Link to="/tasks" className="btn btn-outline-primary btn-sm">
-            View All Tasks <i className="bi bi-arrow-right ms-1"></i>
-          </Link>
+      <div className="row g-4">
+        {/* ACTIVE PROJECTS OVERVIEW */}
+        <div className="col-12 col-lg-4">
+          <div className="tf-card h-100 p-4">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="fw-bold mb-0" style={{ fontSize: '1rem' }}>Active Projects</h5>
+              <Link to="/projects" className="btn btn-sm btn-link text-primary p-0">
+                View All <i className="bi bi-arrow-right"></i>
+              </Link>
+            </div>
+
+            <div className="d-flex flex-column gap-3">
+              {projects.slice(0, 4).map((p) => (
+                <Link
+                  key={p.id}
+                  to={`/projects/${p.id}`}
+                  className="p-3 rounded bg-light border text-decoration-none d-block"
+                  style={{ backgroundColor: 'var(--tf-bg-subtle)', color: 'inherit' }}
+                >
+                  <div className="d-flex align-items-center justify-content-between mb-1">
+                    <div className="d-flex align-items-center gap-2">
+                      <span
+                        className="rounded-circle d-inline-block"
+                        style={{ width: '8px', height: '8px', backgroundColor: p.color }}
+                      ></span>
+                      <strong className="text-truncate" style={{ maxWidth: '140px', fontSize: '0.85rem' }}>
+                        {p.name}
+                      </strong>
+                    </div>
+                    <span className={`badge ${
+                      p.health === 'Healthy' ? 'bg-success' : p.health === 'At Risk' ? 'bg-warning text-dark' : 'bg-danger'
+                    }`} style={{ fontSize: '0.65rem' }}>
+                      {p.health}
+                    </span>
+                  </div>
+
+                  <div className="progress mt-2" style={{ height: '5px' }}>
+                    <div className="progress-bar" style={{ width: `${p.progress_percentage}%`, backgroundColor: p.color }}></div>
+                  </div>
+                  <div className="d-flex justify-content-between text-muted mt-1" style={{ fontSize: '0.7rem' }}>
+                    <span>{p.completed_tasks_count} / {p.tasks_count} done</span>
+                    <span>{p.progress_percentage}%</span>
+                  </div>
+                </Link>
+              ))}
+
+              {projects.length === 0 && (
+                <div className="text-center py-4 text-muted small">No active projects.</div>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="card-body p-0">
-          {loading ? (
-            <div className="p-4"><LoadingSkeleton count={3} /></div>
-          ) : recentTasks.length === 0 ? (
-            <div className="p-5 text-center text-muted">
-              <i className="bi bi-inbox fs-2 text-secondary mb-2 d-block"></i>
-              No recent tasks found. Create your first task to get started!
+        {/* RECENTLY UPDATED TASKS */}
+        <div className="col-12 col-lg-8">
+          <div className="tf-card overflow-hidden h-100">
+            <div className="tf-card-header d-flex justify-content-between align-items-center">
+              <span className="fw-bold small text-uppercase">Recent Deliverables</span>
+              <Link to="/tasks" className="btn btn-sm btn-link text-primary p-0">
+                All Tasks <i className="bi bi-arrow-right ms-1"></i>
+              </Link>
             </div>
-          ) : (
+
             <div className="table-responsive">
-              <table className="table table-hover align-middle mb-0">
-                <thead className="table-light text-muted small text-uppercase">
+              <table className="tf-table">
+                <thead>
                   <tr>
-                    <th scope="col" style={{ width: '40px' }}>Done</th>
-                    <th scope="col">Title</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Priority</th>
-                    <th scope="col">Due Date</th>
-                    {isAdmin && <th scope="col">Owner</th>}
-                    <th scope="col" className="text-end">Actions</th>
+                    <th style={{ width: '40px' }}>Done</th>
+                    <th style={{ width: '90px' }}>Key</th>
+                    <th>Title</th>
+                    <th style={{ width: '120px' }}>Status</th>
+                    <th style={{ width: '100px' }}>Priority</th>
+                    <th style={{ width: '120px' }}>Due Date</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentTasks.map((task) => (
-                    <tr key={task.id}>
-                      <td>
+                    <tr
+                      key={task.id}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleOpenTask(task.id)}
+                    >
+                      <td onClick={(e) => e.stopPropagation()}>
                         <input
                           type="checkbox"
-                          className="form-check-input"
+                          className="form-check-input mt-0"
                           checked={task.status === 'done'}
                           onChange={() => handleQuickStatusToggle(task)}
-                          aria-label={`Mark ${task.title} as ${task.status === 'done' ? 'incomplete' : 'completed'}`}
                         />
                       </td>
                       <td>
-                        <div className={`fw-medium ${task.status === 'done' ? 'text-decoration-line-through text-muted' : 'text-dark'}`}>
+                        <span className="badge bg-secondary font-monospace" style={{ fontSize: '0.75rem' }}>
+                          {task.task_key || `TASK-${task.id}`}
+                        </span>
+                      </td>
+                      <td>
+                        <div className={`fw-semibold text-truncate ${task.status === 'done' ? 'text-decoration-line-through text-muted' : ''}`} style={{ maxWidth: '280px' }}>
                           {task.title}
                         </div>
-                        {task.description && (
-                          <div className="small text-muted text-truncate" style={{ maxWidth: '360px' }}>
-                            {task.description}
-                          </div>
+                        {task.is_blocked && (
+                          <span className="badge bg-danger-subtle text-danger" style={{ fontSize: '0.65rem' }}>
+                            BLOCKED
+                          </span>
                         )}
                       </td>
+                      <td><StatusBadge status={task.status} /></td>
+                      <td><PriorityBadge priority={task.priority} /></td>
                       <td>
-                        <StatusBadge status={task.status} />
-                      </td>
-                      <td>
-                        <PriorityBadge priority={task.priority} />
-                      </td>
-                      <td>
-                        {task.due_date ? (
-                          <span className={`small ${task.is_overdue ? 'badge badge-overdue' : 'text-secondary'}`}>
-                            <i className="bi bi-calendar3 me-1"></i> {task.due_date}
-                          </span>
-                        ) : (
-                          <span className="small text-muted">—</span>
-                        )}
-                      </td>
-                      {isAdmin && (
-                        <td>
-                          <span className="small text-dark fw-medium">
-                            {task.user?.name || `User #${task.user_id}`}
-                          </span>
-                        </td>
-                      )}
-                      <td className="text-end">
-                        <Link to="/tasks" className="btn btn-sm btn-link text-decoration-none">
-                          Manage
-                        </Link>
+                        <span className={`small ${task.is_overdue ? 'text-danger fw-bold' : 'text-muted'}`}>
+                          {task.due_date || '—'}
+                        </span>
                       </td>
                     </tr>
                   ))}
+
+                  {recentTasks.length === 0 && (
+                    <tr>
+                      <td colSpan="6" className="text-center py-4 text-muted small">No recent tasks.</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
-          )}
+          </div>
         </div>
       </div>
-
-      {/* Task Creation Modal */}
-      <TaskFormModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleCreateTask}
-        isAdmin={isAdmin}
-      />
     </div>
   );
 }
