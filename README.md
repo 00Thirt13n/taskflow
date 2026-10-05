@@ -1,4 +1,4 @@
-# TaskFlow — Modern Enterprise Work Management Platform
+# TaskFlow — Modern Work Management Platform for Teams
 
 [![CI Pipeline](https://github.com/00thirt13n/taskflow/actions/workflows/ci.yml/badge.svg)](https://github.com/00thirt13n/taskflow/actions/workflows/ci.yml)
 [![PHP Version](https://img.shields.io/badge/PHP-8.3-blue.svg)](https://www.php.net/)
@@ -6,76 +6,83 @@
 [![React](https://img.shields.io/badge/React-18.x-61dafb.svg)](https://react.dev/)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-orange.svg)](https://www.mysql.com/)
 
-> *"Work should move forward. A focused work management platform for engineering teams that need visibility, ownership, and predictable delivery."*
+> *"Turn scattered work into clear execution. A focused work management platform for teams that need visibility, ownership, and predictable delivery."*
 
-TaskFlow is an enterprise-grade work management platform engineered with the craftsmanship of a senior full-stack developer. Designed to deliver the product depth and information architecture of modern platforms like Linear, Plane, and GitHub Projects, TaskFlow pairs a high-performance **Laravel 11 REST API** with a dense, modern **React 18 Single-Page Application (SPA)**, backed by **MySQL 8.0** with strategic composite indexing and strict foreign key integrity.
+TaskFlow is an enterprise-grade commercial work management platform engineered with the craftsmanship of a senior full-stack developer. Designed to deliver the product depth, information architecture, and UI density of modern software tools like Linear, Plane, and GitHub Projects, TaskFlow pairs a high-performance **Laravel 11 REST API** with a modern **React 18 Single-Page Application (SPA)**, powered by **MySQL 8.0** with strategic composite indexing and strict foreign key integrity.
 
 ---
 
 ## 1. Live Demo & Evaluation Credentials
 
-- **Web Application URL**: `http://localhost:5173` (or deployed domain)
-- **API Base Endpoint**: `http://localhost:8000/api`
+- **Web Application URL**: [http://localhost:5173](http://localhost:5173) (or deployed domain)
+- **API Base Endpoint**: [http://localhost:8000/api](http://localhost:8000/api)
 - **Interactive OpenAPI Specification**: [`public/openapi.yaml`](file:///var/www/html/task_manager/public/openapi.yaml)
-- **API Health Endpoint**: `http://localhost:8000/api/health`
+- **Live System Health Endpoint**: [http://localhost:8000/api/health](http://localhost:8000/api/health)
 
-### 🔑 Instant 1-Click Evaluation Credentials
-The login page provides instant 1-click persona fill buttons for streamlined recruiter and interviewer exploration:
+### 🔑 Instant 1-Click Evaluation Personas (Northstar Engineering)
+The login screen features instant one-click persona fill buttons for immediate evaluation:
 
 | Persona / Role | Email | Password | Access Capabilities |
 |---|---|---|---|
-| **Administrator (Alex Morgan)** | `admin@taskflow.dev` | `Password123!` | Global project oversight, user role administration, audit logs, and live system health diagnostics |
-| **Standard User (Elena Carter)** | `elena@taskflow.dev` | `Password123!` | Developer workspace access, task management, Kanban boards, subtask tracking, and commenting |
-| **Standard User (Sarah Chen)** | `sarah@taskflow.dev` | `Password123!` | Product designer demonstrating tenant isolation and IDOR protection against cross-user mutations |
+| **Maya Lin (Workspace Admin)** | `admin@taskflow.dev` | `Password123!` | Global project oversight, team role administration, audit logs with JSON diffs, and live system diagnostics |
+| **Arjun Patel (Lead Engineer)** | `demo@taskflow.dev` | `Password123!` | Engineering lead managing Customer Portal (`PORT`) and Platform Reliability (`REL`) tasks, boards, and subtasks |
+| **Sofia Rossi (Staff Designer)** | `sarah@taskflow.dev` | `Password123!` | Staff product designer demonstrating strict tenant isolation and server-side IDOR policy enforcement |
 
 ---
 
-## 2. Enterprise Product Hierarchy
+## 2. Commercial Domain Model Hierarchy
 
-TaskFlow avoids flat, simplistic CRUD lists by modeling real enterprise team operations across four structured domain tiers:
+TaskFlow models real enterprise team operations across five structured tiers:
 
 ```
-Organization
+Organization (Northstar Labs)
     ↓
-Workspaces (e.g., "Acme Core Engineering")
+Workspaces (e.g., "Northstar Engineering")
     ↓
-Projects (e.g., "Website Redesign", "Mobile App v2", "Infra & Security")
+Projects (e.g., "Customer Portal v2", "Platform Reliability", "Product Launch")
     ↓
-Tasks (e.g., "WEB-101", "MOB-204", "INF-301")
+Work Items (e.g., "PORT-101", "REL-204", "LAUNCH-305")
     ↓
-Subtasks  •  Dependencies  •  Discussions / Comments  •  Activity Logs
+Subtasks (Checklist)  •  Blocker Flags  •  Discussions  •  Activity Logs
 ```
 
 ---
 
-## 3. Feature Matrix & Capabilities
+## 3. Product Architecture & Capabilities
 
-### Multi-View Task Suite
-- 📋 **Interactive Table View**: High information density, bulk selection toolbar, sortable columns, and pagination.
-- 📌 **Kanban Board**: Drag-and-drop swimlanes (Backlog, Todo, In Progress, Review, Done) with optimistic UI updates and instant status persistence.
-- 📅 **Monthly Calendar View**: Visualizes task due dates and project milestones on an interactive calendar grid.
-- ⏱️ **Gantt-Style Timeline Schedule**: Tracks project delivery windows, start dates, and target due dates.
+### Public Commercial Marketing Website
+- 🌐 **Modern SaaS Homepage (`/`)**: Value proposition (*"Turn scattered work into clear execution"*), real interactive browser-style product window (with live tabs for Overview, Board, and Timeline), problem-to-solution narrative, and grounded AI showcase.
+- 📱 **Role-Based Solutions (`/solutions`)**: Targeted use cases for Engineering, Product Managers, DevOps/Operations, and Executive Leadership.
+- 🛡️ **Architecture-Based Security (`/security`)**: Real security specifications: RBAC Policies, anti-IDOR boundaries, rate limiting, and immutable audit logs.
+- 💰 **Transparent Editions (`/pricing`)**: Free live Community Demo tier vs Team Workspace and Enterprise Cloud preview tiers.
+- 📬 **Interactive Inquiries (`/contact`)**: Instant demo request and contact form with simulated submission feedback.
+- 🟢 **Live Status Page (`/status`)**: Real-time probe of API latency, MySQL database connectivity, and worker status.
 
-### Collaboration & Detail Experience
-- 🔍 **Slide-Over Task Detail Drawer**: Quick status/priority pickers, subtasks checklist with parent progress indicators (e.g. 2/3 completed), blocker reason flags, and discussion comments feed with author deletion rights.
-- 📜 **Chronological Activity Timeline**: Records every state change, status transition, priority adjustment, and assignment with before/after state diffs.
-- ⚡ **Global Command Palette (`Ctrl+K` / `/`)**: Keyboard-driven universal search across tasks, projects, users, and navigation shortcuts.
-- 🔔 **Notification Center**: Header bell with unread badge count, notification items (assignments, comments, mentions), and mark-read actions.
-- 📥 **My Work Experience**: Dedicated personal hub organized by Overdue, Due Today, Upcoming, and Completed tasks.
+### Authenticated Workspace Application (`/app/*`)
+- 🏠 **Home Cockpit (`/app/home`)**: Morning briefing (*"Good morning, Arjun"*), focus chips, attention needed widget (blocked and overdue deliverables), project health bars, and priority task lists.
+- 📥 **My Work (`/app/my-work`)**: Personal productivity hub organized by Overdue, Due Today, Upcoming, and Completed tasks.
+- 📁 **Projects & Health (`/app/projects`)**: Delivery streams with calculated health indicators (`Healthy`, `At Risk`, `Delayed`), progress bars, and member rosters.
+- 📌 **Multi-View Task Suite (`/app/tasks`)**:
+  - **Interactive Table View**: Compact rows, bulk selection toolbar (status, priority, delete), column filtering, and pagination.
+  - **Kanban Board**: Drag-and-drop swimlanes (Backlog, Todo, In Progress, Review, Done) with optimistic UI reordering and status persistence.
+  - **Monthly Calendar Grid**: Visualizes task due dates and project milestones.
+  - **Gantt-Style Timeline Schedule**: Tracks project delivery windows and progress percentages.
+- 🔍 **Slide-Over Task Detail Drawer**: Inline status and priority pickers, subtasks checklist with progress counts (e.g. 2/3 completed), blocker toggle with reason, discussion comments feed with author permissions, and chronological activity timeline.
+- ⚡ **Global Command Palette (`Ctrl+K` / `/`)**: Universal keyboard search across tasks, projects, users, and navigation shortcuts.
+- 🔔 **Notification Center**: Global header bell with unread badge count, notification items (assignments, comments, mentions), and mark-read actions.
+- 📊 **Executive Reports (`/app/reports`)**: 7-day velocity net completion trends, project status distributions, team workload breakdown, and streaming CSV export.
+- 🛡️ **Admin Center (`/app/admin/*`)**: User management with 1-click role toggles, audit log inspector with JSON diff modal, and live system health diagnostics.
+- 🎨 **Enterprise Design System & Dark Mode**: CSS custom properties supporting seamless light and dark mode toggling (`data-theme="dark"`).
 
-### Executive Analytics & Administration
-- 📈 **Executive Reports & Velocity**: 7-day velocity net completion trends, project status distributions, team workload breakdown, and streaming CSV export.
-- 🛡️ **Admin Center**: User management with 1-click role toggles, audit log inspector with JSON diff modal, and live system health diagnostics.
-- 🎨 **Enterprise Design System & Dark Mode**: CSS custom properties supporting seamless light and dark mode toggling, system preference detection, and `localStorage` persistence.
-
-### AI Task Assistant
-- 🤖 **Natural Language Task Parser**: Parse natural phrases like *"Deploy Nginx security patches by Friday, high priority, assign to Michael"* into structured task drafts.
+### Grounded AI Assistant
+- 🤖 **Natural Language Parser**: Converts phrases like *"Deploy Nginx security patches by Friday, high priority, assign to Daniel"* into structured task drafts.
 - 📝 **Automated Subtask Decomposition**: Generates actionable checklist subtasks from task descriptions.
-- 💡 **Description Enhancer & Priority Classifier**: Polishes acceptance criteria with automatic heuristic fallback protection.
+- 💡 **Description Enhancer & Priority Classifier**: Refines acceptance criteria with automatic heuristic fallback protection.
+- 🔒 **Grounded Principle**: *"AI suggests. Your team decides."* All AI outputs are previewed and confirmed before database persistence.
 
 ---
 
-## 4. Technology Stack & Architecture
+## 4. Technology Stack & Performance
 
 ### Backend
 - **Framework**: Laravel 11.x on PHP 8.3.35.
@@ -119,7 +126,7 @@ composer install
 cp .env.example .env
 php artisan key:generate
 
-# 4. Run migrations and enterprise narrative seeder
+# 4. Run migrations and enterprise narrative seeder (Northstar Engineering)
 php artisan migrate:fresh --seed
 
 # 5. Start Laravel development server
@@ -161,19 +168,21 @@ npm test -- --run
 
 ## 7. Complete Documentation Suite
 
-All architectural decisions, benchmarks, and interview preparation materials are documented in [`docs/`](file:///var/www/html/task_manager/docs/):
+All architectural decisions, benchmarks, and product specifications are documented in [`docs/`](file:///var/www/html/task_manager/docs/):
 
-- [`docs/current-state-audit.md`](file:///var/www/html/task_manager/docs/current-state-audit.md): Complete baseline audit and enterprise transformation plan.
-- [`docs/architecture.md`](file:///var/www/html/task_manager/docs/architecture.md): System architecture, 4-tier domain hierarchy, and request pipeline.
-- [`docs/database.md`](file:///var/www/html/task_manager/docs/database.md): Schema specification, entity relationships, and foreign keys.
+- [`docs/ui-ux-audit.md`](file:///var/www/html/task_manager/docs/ui-ux-audit.md): Comprehensive UI/UX bug audit across 6 viewports and resolution plan.
+- [`docs/design-system.md`](file:///var/www/html/task_manager/docs/design-system.md): Centralized typography, spacing, radius, shadows, and color tokens.
+- [`docs/product-positioning.md`](file:///var/www/html/task_manager/docs/product-positioning.md): Brand voice, messaging pillars, and commercial vocabulary.
+- [`docs/final-qa.md`](file:///var/www/html/task_manager/docs/final-qa.md): Multi-viewport responsive audit and commercial readiness verification.
+- [`docs/architecture.md`](file:///var/www/html/task_manager/docs/architecture.md): System architecture, 5-tier domain hierarchy, and request pipeline.
+- [`docs/database.md`](file:///var/www/html/task_manager/docs/database.md): Schema specification, entity relationships, and indexing rationale.
 - [`docs/query-optimization.md`](file:///var/www/html/task_manager/docs/query-optimization.md): Before/after `EXPLAIN ANALYZE` benchmarks.
-- [`docs/api.md`](file:///var/www/html/task_manager/docs/api.md): REST API reference documentation.
+- [`docs/api.md`](file:///var/www/html/task_manager/docs/api.md): REST API reference documentation for all 44 endpoints.
 - [`docs/security.md`](file:///var/www/html/task_manager/docs/security.md): Threat modeling, IDOR prevention, and RBAC policies.
 - [`docs/observability.md`](file:///var/www/html/task_manager/docs/observability.md): Monolog structured logs, health checks, and diagnostics.
 - [`docs/backup-recovery.md`](file:///var/www/html/task_manager/docs/backup-recovery.md): MySQL backup strategy, binlogs, and disaster recovery.
 - [`docs/accessibility.md`](file:///var/www/html/task_manager/docs/accessibility.md): WCAG 2.1 Level AA compliance audit.
-- [`docs/design-decisions.md`](file:///var/www/html/task_manager/docs/design-decisions.md): Enterprise design system tokens and state strategies.
-- [`docs/interview-guide.md`](file:///var/www/html/task_manager/docs/interview-guide.md): 14 in-depth interview questions and technical answers.
+- [`docs/interview-guide.md`](file:///var/www/html/task_manager/docs/interview-guide.md): 14 in-depth technical interview questions and model answers.
 - [`docs/final-verification.md`](file:///var/www/html/task_manager/docs/final-verification.md): Verification matrix with automated test results.
 
 ---
