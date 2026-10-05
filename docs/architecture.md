@@ -1,20 +1,20 @@
 # TaskFlow System Architecture
 
 ## 1. System Overview
-**TaskFlow** is structured as a decoupled Single-Page Application (SPA) with a RESTful backend API. It leverages Laravel 11 on PHP 8.3 for business logic and data persistence, paired with a React 18 (Vite-bundled) frontend client.
+**TaskFlow** is structured as an enterprise-grade Single-Page Application (SPA) with a RESTful backend API. It leverages Laravel 11 on PHP 8.3 for business logic, transactional integrity, and data persistence, paired with a React 18 (Vite-bundled) frontend client adhering to a dense, modern SaaS design system.
 
 ```mermaid
 graph TD
     UserClient["Web Browser (React 18 SPA)"]
-    ReverseProxy["Nginx Reverse Proxy / Load Balancer"]
+    ReverseProxy["Nginx Reverse Proxy (SSL / Static Assets)"]
     LaravelAPI["Laravel 11 REST API (PHP 8.3 FPM)"]
-    MySQLDB[("MySQL 8.0 Database")]
+    MySQLDB[("MySQL 8.0 Database (InnoDB)")]
     RedisCache[("Redis (Cache & Queue)")]
-    GeminiAPI["Google Gemini AI API (Optional)"]
+    GeminiAPI["Google Gemini AI API (Fallback Provider)"]
 
     UserClient -->|HTTPS /api/*| ReverseProxy
-    UserClient -->|HTTPS /* (Static Assets)| ReverseProxy
-    ReverseProxy -->|Proxy /api/*| LaravelAPI
+    UserClient -->|HTTPS /* (SPA Bundle)| ReverseProxy
+    ReverseProxy -->|FastCGI / Proxy /api/*| LaravelAPI
     ReverseProxy -->|Serve Static HTML/JS/CSS| UserClient
     LaravelAPI -->|PDO / SQL| MySQLDB
     LaravelAPI -->|RESP Protocol| RedisCache
@@ -23,9 +23,37 @@ graph TD
 
 ---
 
-## 2. Request Lifecycle & Pipeline
+## 2. Information Architecture & Hierarchy
 
-Every incoming HTTP request to the API undergoes a strict, structured pipeline before reaching controllers:
+TaskFlow models real enterprise work management by transitioning away from flat task lists into a structured 4-tier domain hierarchy:
+
+```
+Organization / Team
+    ↓
+Workspace (e.g., "Acme Core Engineering")
+    ↓
+Projects (e.g., "Website Redesign", "Mobile App v2", "Infra & Security")
+    ↓
+Tasks (e.g., "WEB-101", "MOB-204", "INF-301")
+    ↓
+Subtasks  •  Dependencies  •  Discussions / Comments  •  Activity Logs
+```
+
+### Access & Role Hierarchy
+- **System Level**:
+  - `admin`: Global access to all projects, user management, audit logs, and system diagnostics.
+  - `user`: Standard tenant member access.
+- **Project Level**:
+  - `owner`: Full project management and deletion rights.
+  - `manager`: Task assignment, milestone definition, and member assignment.
+  - `member`: Task creation, status updates, commenting, and subtask management.
+  - `viewer`: Read-only access to boards, timelines, and reports.
+
+---
+
+## 3. Request Lifecycle & Security Pipeline
+
+Every incoming HTTP request undergoes a strict pipeline before controller execution:
 
 ```mermaid
 sequenceDiagram
@@ -51,120 +79,64 @@ sequenceDiagram
         Kernel-->>Client: 422 Unprocessable Entity + errors[]
     end
     Kernel->>Policy: TaskPolicy::update(User, Task)
-    alt Forbidden (Not Owner & Not Admin)
+    alt Forbidden (Not Owner, Assignee, or Admin)
         Policy-->>Client: 403 Forbidden
     end
     Policy->>Controller: update(UpdateTaskRequest, Task)
     Controller->>DB: Eloquent Model Update (Transaction)
+    Controller->>DB: Log Activity / Notification Creation
     opt Admin Action on Other User Task
         Controller->>Service: AuditLoggerService::log(...)
-        Service->>DB: INSERT into audit_logs
     end
+    DB-->>Controller: Fresh Task with Relations
     Controller-->>Client: 200 OK + TaskResource (JSON)
 ```
 
 ---
 
-## 3. Authentication & Authorization Flow
+## 4. Frontend Architecture
 
-### Authentication (Laravel Sanctum)
-- **Token-based API Authentication**: Uses lightweight, state-conscious Bearer tokens via Laravel Sanctum (`PersonalAccessToken`).
-- **Registration**: Normalizes email to lowercase, validates password complexity (min 8 chars, mixed case/numbers), creates user with default `user` role, and issues token.
-- **Login**: Compares hashed credentials with bcrypt via constant-time comparison, generates a single active session token, and records login timestamp.
-- **Logout**: Revokes the current token (`$user->currentAccessToken()->delete()`).
-- **Endpoint Protection**: Sanctum middleware (`auth:sanctum`) protects all `/api/tasks/*`, `/api/admin/*`, and `/api/me` routes.
-
-### Authorization (RBAC with Policies)
-Authorization strictly follows the principle of least privilege. There are two primary roles:
-1. `admin`: Has global management capabilities (can view, update, delete any task, inspect user list, and view append-only audit logs).
-2. `user`: Scoped strictly to their own data. Any attempt to read, modify, or delete another user's task returns a `403 Forbidden` (or `404 Not Found` when scoped via model queries).
-
-```mermaid
-flowchart TD
-    Req[Incoming API Request] --> IsAuth{Has Valid Sanctum Token?}
-    IsAuth -- No --> Ret401[Return 401 Unauthorized]
-    IsAuth -- Yes --> CheckRole{User Role}
-    
-    CheckRole -- Admin --> AdminPerms[Allow Full Access to Tasks, Users, Audit Logs]
-    CheckRole -- Regular User --> UserPerms{Is Task Owned by User?}
-    
-    UserPerms -- Yes --> Allow[Execute Operation]
-    UserPerms -- No --> Ret403[Return 403 Forbidden]
-```
+### Component Hierarchy & Layouts
+- **Layouts**:
+  - `PublicLayout`: Clean marketing and authentication layout (Landing, Login, Register) with brand navigation.
+  - `AppLayout`: Persistent sidebar, global header with workspace switcher, quick create trigger, notification center bell, and command palette (`Ctrl+K`).
+- **State Strategy**:
+  - `AuthContext`: Manages current user profile, tokens, login/logout transitions, and admin status.
+  - `ThemeContext`: Manages light/dark mode persistence via `data-theme` attribute and `localStorage`.
+  - Local component state: Multi-view modes, active filters, drawer open states, and drag-and-drop feedback.
+- **Multi-View Engine**:
+  - `Table View`: High information density, bulk selection toolbar, sortable columns, pagination.
+  - `Board View (Kanban)`: Backlog, Todo, In Progress, Review, and Done swimlanes with HTML5 drag-and-drop and optimistic positioning updates.
+  - `Calendar View`: Monthly grid highlighting due dates, milestones, and quick status badges.
+  - `Timeline View`: Horizontal Gantt-style schedule visualizing start and target due dates with completion percentages.
+- **Interactive Modals & Drawers**:
+  - `TaskDetailDrawer`: Full slide-over experience showing metadata, checklist subtasks, blockers, comments feed, and activity timeline.
+  - `TaskCreateModal`: Fast task creator with integrated AI natural language prompt parser.
+  - `CommandPalette`: Modal with keyboard navigation across tasks, projects, and navigation shortcuts.
 
 ---
 
-## 4. Database Relationship Model
+## 5. Backend Architecture & Clean Code Patterns
 
-```mermaid
-erDiagram
-    ROLES ||--o{ USERS : assigns
-    USERS ||--o{ TASKS : owns
-    USERS ||--o{ AUDIT_LOGS : performs
-
-    ROLES {
-        bigint id PK
-        string name UK "admin | user"
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    USERS {
-        bigint id PK
-        bigint role_id FK
-        string name
-        string email UK
-        string password
-        string remember_token
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    TASKS {
-        bigint id PK
-        bigint user_id FK
-        string title
-        text description
-        string status "todo | in-progress | done"
-        string priority "low | medium | high"
-        date due_date
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    AUDIT_LOGS {
-        bigint id PK
-        bigint user_id FK
-        string action
-        string entity_type
-        bigint entity_id
-        json metadata
-        string ip_address
-        string user_agent
-        timestamp created_at
-    }
-```
+- **Thin Controllers**: Controllers orchestrate request validation, policy authorization, and resource serialization.
+- **Form Requests**: All mutation payloads (`StoreTaskRequest`, `UpdateTaskRequest`, `BulkTaskRequest`) are validated at the edge before controller execution.
+- **Service Layer**:
+  - `AiTaskSuggestionService`: Encapsulates AI heuristics, Gemini API integration, JSON output extraction, and fallback rules.
+  - `AuditLoggerService`: Immutable structured logging of sensitive actions with before/after state diffs, client IPs, and user agents.
+- **API Resources**: `TaskResource` and `ProjectResource` normalize data representations and prevent accidental leakage of sensitive internal attributes (like password hashes).
+- **Database Transactions**: Multi-step operations (e.g. bulk status changes + activity logging, project creation + owner membership assignment) run inside `DB::transaction()` closures to guarantee atomicity.
 
 ---
 
-## 5. Frontend / Backend Communication Contract
+## 6. Real-Time Considerations & Scalability
 
-- **Base URL**: `/api` (same origin or configured via `VITE_API_URL`).
-- **Headers**:
-  - `Accept: application/json`
-  - `Content-Type: application/json`
-  - `Authorization: Bearer <token>`
-- **Standard Response Envelope**:
-  - Single Resource: `{ "data": { ... } }`
-  - Paginated Collection: `{ "data": [ ... ], "links": { ... }, "meta": { "current_page": 1, "last_page": 5, "total": 42 } }`
-  - Standard Error: `{ "message": "The given data was invalid.", "errors": { "title": ["The title field is required."] } }`
-  - Health Endpoint: `{ "status": "ok", "timestamp": "...", "database": "connected", "database_latency_ms": 1.2 }`
+### Current Architecture
+- TaskFlow utilizes client-side polling and active event invalidation (refetching on mutation).
+- All endpoints support ETag caching and conditional HTTP headers for optimal network efficiency.
 
----
-
-## 6. Deployment Architecture
-
-For containerized and production deployments:
-- **Nginx** handles TLS termination, HTTP-to-HTTPS redirect, serves pre-built static Vite bundle (`/usr/share/nginx/html`), and proxies `/api/*` requests to PHP-FPM.
-- **PHP-FPM** executes Laravel API requests under non-root user `www-data` with opcache enabled.
-- **MySQL 8.0** handles transactional persistence on an internal container network (port 3306 never exposed publicly).
+### Future Real-Time Roadmap
+- **Broadcasting Layer**: Laravel Echo + Pusher / Soketi (open-source WebSockets server).
+- **Channels**:
+  - `private-workspace.{id}`: Broadcasts task movement across Kanban boards to all active team members.
+  - `private-user.{id}`: Pushes real-time notification toasts when tasks are assigned or comments are posted.
+- **Fallback Strategy**: Server-Sent Events (SSE) for low-overhead unidirectional updates (such as AI progress streaming).

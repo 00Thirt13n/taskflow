@@ -1,128 +1,106 @@
 # TaskFlow Technical Interview Guide
 
-*Designed for a developer with strong PHP/Laravel/MySQL experience demonstrating a full-stack production application to senior interviewers.*
+*Engineered for a senior full-stack developer demonstrating a production-grade enterprise work management application.*
 
 ---
 
 ## 1. Project High-Level Architecture
-TaskFlow is a decoupled full-stack application:
+TaskFlow is a decoupled full-stack enterprise application:
 - **Backend**: Laravel 11 running on PHP 8.3. Exposes a clean, RESTful JSON API using Laravel Sanctum for token authentication, Form Requests for authoritative validation, Policies for role-based access control (RBAC), and Eloquent API Resources for data transformations.
-- **Frontend**: Single-Page Application (SPA) built with React 18 and Vite. It consumes the Laravel API via Axios, uses React Router v6 for client-side routing, and relies on React's Context API (`AuthContext`, `ToastContext`) for global session and notification state.
+- **Frontend**: Single-Page Application (SPA) built with React 18 and Vite. It consumes the Laravel API via Axios, uses React Router v6 for client-side routing, and relies on React's Context API (`AuthContext`, `ThemeContext`) for global session and theme state.
 - **Database**: MySQL 8.0 with InnoDB engine, enforcing foreign key integrity (`cascadeOnDelete` and `restrictOnDelete`), and composite B-Tree indexes matching real query patterns.
+- **Domain Hierarchy**: Organization → Workspaces → Projects → Tasks → Subtasks / Dependencies / Comments / Activity.
 
 ---
 
-## 2. Authentication & Authorization Deep Dive
+## 2. Deep-Dive Interview Questions & Concrete Technical Answers
 
-### Authentication Flow (Sanctum Tokens)
-1. User submits email and password to `POST /api/login`.
-2. Laravel's `AuthController` normalizes the email, then invokes `Auth::attempt(['email' => $email, 'password' => $password])`.
-3. Under the hood, Laravel pulls the user record by email and executes `password_verify()` using Bcrypt.
-4. If valid, Sanctum generates a cryptographically secure random token (`$user->createToken('taskflow-auth-token')->plainTextToken`). The hash is stored in the `personal_access_tokens` table.
-5. The plain-text token is returned to the React client and saved in browser `localStorage`.
-6. Subsequent requests attach the token in the `Authorization: Bearer <token>` header via an Axios request interceptor.
+### Q1: Why Laravel?
+> *"Laravel 11 provides a battle-tested foundation for enterprise web APIs: an expressive ORM (Eloquent), built-in database migrations, a secure authorization engine (Gates and Policies), robust validation pipelines (Form Requests), and native queues. In a team setting, it enforces predictable conventions (controllers, resources, services) so developers spend time solving business problems rather than re-inventing routing, password hashing, or database connection pooling."*
 
-### 401 Unauthorized vs 403 Forbidden (Classic Interview Question!)
-- **`401 Unauthorized` (Unauthenticated)**: The client has *not* proven who they are. They either provided no token, an invalid token, or an expired session.
-  - *Example*: Requesting `/api/tasks` without the `Authorization` header returns `401`.
-- **`403 Forbidden` (Unauthorized)**: The client *is* successfully authenticated (we know who they are), but their role or identity does *not* grant permission to perform the requested operation.
-  - *Example*: User Elena (`user_id = 2`) tries to edit Sarah's task (`user_id = 3`) via `PUT /api/tasks/10`. Elena is logged in, but `TaskPolicy::update()` returns `false`, resulting in `403 Forbidden`.
+### Q2: Why React?
+> *"React 18's component-based model is the industry standard for interactive, high-density work management UIs like Linear or GitHub Projects. With concurrent rendering, custom hooks for API integration, and virtual DOM diffing, it allows building complex interactive multi-views (Table, Kanban drag-and-drop, monthly Calendar, Gantt Timeline, and slide-over drawers) without full-page reloads, providing the snappy feel users expect from a modern productivity platform."*
 
----
+### Q3: Why Sanctum? Session vs JWT vs Sanctum Tokens?
+> *"I chose Laravel Sanctum personal access tokens over stateless JWTs and stateful cookie sessions for clear architectural reasons:
+> 1. **Immediate Token Revocation**: Stateless JWTs cannot be revoked immediately without implementing token blacklisting in Redis (which reintroduces state). Sanctum hashes tokens in MySQL (`personal_access_tokens`), making revocation instantaneous (`$user->currentAccessToken()->delete()`).
+> 2. **Cross-Origin & Mobile Readiness**: Bearer tokens are decoupled from browser cookie constraints, avoiding Third-Party Cookie blocking (Safari ITP / Chrome Privacy Sandbox) and allowing the same API to serve mobile apps or CLI tools cleanly."*
 
-## 3. Database Indexing & EXPLAIN Analysis
+### Q4: How does authorization work and how do you prevent IDOR?
+> *"Authorization is enforced strictly on the server side using Laravel Policies (`TaskPolicy`, `ProjectPolicy`, `AdminPolicy`). 
+> Frontend UI hiding (like disabling edit buttons) is strictly a UX convenience, never a security boundary.
+> To prevent Insecure Direct Object Reference (IDOR):
+> 1. Controller methods authorize the target model before executing any mutation: `$this->authorize('update', $task)`.
+> 2. The policy inspects whether `$user->role->name === 'admin'` OR `$task->user_id === $user->id` OR `$task->assignee_id === $user->id`.
+> 3. For project operations, membership is verified in the `project_members` pivot table with required role thresholds (`owner`, `manager`, `member`).
+> 4. If authorization fails, Laravel automatically aborts with `403 Forbidden`."*
 
-### What makes the index `(user_id, status, due_date)` optimal?
-When an authenticated user loads their tasks:
-```sql
-SELECT id, title, status, priority, due_date 
-FROM tasks 
-WHERE user_id = 2 AND status = 'todo' 
-ORDER BY due_date ASC 
-LIMIT 10;
-```
-- **Without the composite index**: MySQL would do a scan, find matching rows, write them to a temporary memory buffer, and perform a sorting pass (`Using filesort`).
-- **With composite index `(user_id, status, due_date)`**:
-  - The B-Tree branches first on `user_id = 2`.
-  - Inside that branch, it seeks `status = 'todo'`.
-  - Within those leaf nodes, the records are **already ordered by `due_date ASC`** physically on disk!
-  - MySQL simply reads the first 10 leaf entries and returns them immediately without sorting.
-  - Actual measured `EXPLAIN ANALYZE` time: **0.068 ms** with `Extra: NULL` (no filesort!).
+### Q5: Why these specific database indexes and how did EXPLAIN help?
+> *"We analyzed actual query patterns and identified two primary read bottlenecks:
+> 1. Filtered tasks by project and status: `WHERE project_id = ? AND status = ? ORDER BY position ASC`.
+> 2. Personal dashboard / 'My Work': `WHERE assignee_id = ? AND status = ? ORDER BY due_date ASC`.
+> Running `EXPLAIN` on an unindexed table revealed `type: ALL` (full table scan) and `Extra: Using filesort` (MySQL allocating memory buffers to sort rows).
+> By introducing composite B-Tree indexes:
+> - `tasks(project_id, status, position)`
+> - `tasks(assignee_id, status, due_date)`
+> `EXPLAIN ANALYZE` confirmed `type: ref` with zero filesort (`Extra: NULL`) because records are already physically sorted on disk within the B-Tree leaf nodes. Execution time dropped from 3.8 ms to 0.068 ms."*
 
-### The Left-to-Right Index Rule
-An index on `(A, B, C)` can serve:
-- `WHERE A = ?`
-- `WHERE A = ? AND B = ?`
-- `WHERE A = ? AND B = ? AND C = ?`
-- `WHERE A = ? AND B = ? ORDER BY C`
-It CANNOT serve:
-- `WHERE B = ?` (without A)
-- `WHERE C = ?` (without A and B)
+### Q6: How does React manage state? Why useEffect and Context?
+> *"We follow the rule of least complexity:
+> 1. **Local State (`useState`)**: Used for transient UI state that lives within a component (e.g. drawer open/closed, active filter selections, current tab).
+> 2. **Global State (`React Context`)**: Used strictly for application-wide concerns that change infrequently—specifically `AuthContext` (token, user profile, admin boolean) and `ThemeContext` (light vs dark mode).
+> 3. **Side Effects (`useEffect`)**: Used to synchronize component state with external systems (e.g. fetching tasks on mount, listening to `Ctrl+K` keydowns, or writing theme preferences to `localStorage`). We use memoized callbacks (`useCallback`) and cleanup functions to avoid memory leaks and infinite re-render loops."*
 
----
+### Q7: How does Kanban drag-and-drop work?
+> *"We utilize HTML5 Drag and Drop API (`onDragStart`, `onDragOver`, `onDrop`):
+> 1. When a user begins dragging a task card, `onDragStart` serializes the `taskId` into `dataTransfer`.
+> 2. Dropping onto a destination column invokes an **optimistic UI update**: the local React state updates the card's column immediately so the interaction feels instantaneous.
+> 3. In the background, React fires `taskService.updateStatus(taskId, targetStatus)`.
+> 4. If the network request fails, the client rolls back the card to its previous status and triggers an error toast alert."*
 
-## 4. React SPA for Laravel Developers
+### Q8: How would this scale to 100,000 active users?
+> *"Scaling TaskFlow from a single instance to 100k users requires a multi-tier horizontal scale plan:
+> 1. **Stateless Web Tier**: Run multiple Laravel PHP-FPM containers behind an Nginx or AWS ALB load balancer. Because Sanctum tokens are database-stored, requests can be routed to any instance.
+> 2. **Database Read Replicas**: Configure Laravel's `config/database.php` with separate `read` and `write` PDO connections. Queries for boards, reports, and dashboards hit MySQL read replicas, while mutations hit the primary database.
+> 3. **Redis Caching**: Cache expensive workspace metadata, user permission sets, and system health status with short TTLs and tag-based cache invalidation.
+> 4. **Asynchronous Queues**: Offload notifications, audit log writes, AI requests, and CSV exports to background workers managed by Laravel Horizon and Redis."*
 
-### Component Lifecycle & Hooks
-1. **`useState`**: Stores component-local state.
-   - *Example*: `const [tasks, setTasks] = useState([]);`
-   - Calling `setTasks(newData)` triggers React to re-render the component with the new data.
-2. **`useEffect`**: Performs side effects (like data fetching or event subscriptions) after rendering.
-   - *Example*:
-     ```jsx
-     useEffect(() => {
-       fetchTasks();
-     }, [fetchTasks]);
-     ```
-   - The dependency array `[fetchTasks]` ensures the effect only runs when the dependencies change, preventing infinite fetch loops.
-3. **`useCallback`**: Memoizes a function instance so it isn't recreated on every single render.
-   - Used on `fetchTasks` so child components or `useEffect` hooks don't trigger unnecessary re-renders.
-4. **`useDebounce`**: A custom hook that delays updating a state value until the user pauses typing (350ms).
-   - This prevents making 10 API requests while a user types `"Deployment"`. It fires exactly 1 search query when typing pauses.
+### Q9: What happens if the AI service fails or times out?
+> *"The AI assistant (`AiTaskSuggestionService`) is designed with defensive fault tolerance:
+> 1. **Short Timeout**: External calls to Google Gemini have an explicit 3.5-second timeout and a single retry.
+> 2. **Deterministic Heuristic Fallback**: If the Gemini API key is missing, times out, or returns a 5xx response, the service automatically switches to a local deterministic heuristic engine. It inspects keyword patterns ('urgent', 'asap', 'bug', 'critical') to classify priority and generate sensible subtasks.
+> 3. **Non-Blocking Flow**: AI suggestions never block core task creation. Users can always create and edit tasks manually regardless of AI availability."*
 
-### Protected Routing
-In `frontend/src/routes/ProtectedRoute.jsx`:
-- Checks `isAuthenticated` from `AuthContext`.
-- If true, renders child page (`DashboardPage`, `TasksPage`).
-- If false, uses `<Navigate to="/login" state={{ from: location }} replace />` to redirect the user to login while remembering where they wanted to go!
+### Q10: What happens if the database becomes slow?
+> *"1. **Slow Query Logging**: Enable MySQL `slow_query_log` with `long_query_time = 1.0` to capture queries exceeding 1 second.
+> 2. **Connection Pooling**: Use ProxySQL to maintain persistent connection pools between Laravel and MySQL.
+> 3. **Pagination Guardrails**: Enforce strict `per_page` limits (maximum 100) and convert deep offset queries to cursor/keyset pagination (`WHERE id < :cursor`).
+> 4. **Query Caching**: Cache static lookup tables (roles, labels, workspace lists) in Redis."*
 
----
+### Q11: What happens if the background queue fails?
+> *"1. **Failed Jobs Table**: Laravel writes failed queue jobs to `failed_jobs` containing the job payload, exception class, and stack trace.
+> 2. **Dead Letter Queue (DLQ)**: Failed tasks trigger a Sentry / Slack alert for on-call notification.
+> 3. **Safe Retries**: Jobs use exponential backoff (`public $backoff = [30, 120, 600];`) and a maximum attempts limit (`public $tries = 3;`).
+> 4. **Artisan Remediation**: Once the upstream issue is resolved, jobs are re-queued with `php artisan queue:retry all`."*
 
-## 5. Security Checklist & Answers
+### Q12: How would you migrate this application from MySQL to PostgreSQL?
+> *"Because TaskFlow is built on Eloquent ORM and standard migrations, migrating to PostgreSQL is straightforward:
+> 1. Change `DB_CONNECTION=pgsql` and `DB_PORT=5432` in `.env`.
+> 2. Replace any raw MySQL functions with ANSI SQL equivalents.
+> 3. PostgreSQL treats double-quotes as identifiers and single-quotes as strings, which Eloquent handles automatically.
+> 4. For full-text search, replace MySQL `LIKE` queries with PostgreSQL `tsvector` and `tsquery` with GIN indexing for fast multi-language search.
+> 5. Run `php artisan migrate --seed` to generate the Postgres schema."*
 
-| Threat / Vulnerability | How TaskFlow Mitigates It |
-|---|---|
-| **Insecure Direct Object Reference (IDOR)** | Server-side Laravel Policies (`$this->authorize()`) on every model mutation. Frontend hiding is UX only; backend policies are the security boundary. |
-| **SQL Injection** | Strict Eloquent ORM and PDO prepared statements with bounded parameters across all queries. |
-| **Cross-Site Scripting (XSS)** | React automatically escapes variables in JSX. Response JSON is strictly typed. |
-| **Cross-Site Request Forgery (CSRF)** | API authentication uses Bearer tokens in headers (not vulnerable to automatic browser cookie attachment). |
-| **Rate Limiting** | Rate limiters configured in Laravel router (`throttle:10,1` on auth endpoints). |
-| **Sensitive Data Exposure** | `User::$hidden = ['password', 'remember_token']`, `APP_DEBUG=false` in production, centralized JSON error handling without stack traces. |
+### Q13: How would you deploy this on AWS?
+> *"1. **Compute**: Run containerized PHP-FPM and Nginx tasks on AWS ECS (Elastic Container Service) with AWS Fargate for serverless scaling.
+> 2. **Database**: Amazon Aurora MySQL Serverless v2 with automated daily snapshots and Multi-AZ replication.
+> 3. **Cache & Queue**: Amazon ElastiCache for Redis running cluster mode.
+> 4. **Frontend Assets**: Deploy Vite production build to Amazon S3 distributed globally via Amazon CloudFront CDN.
+> 5. **Secrets & Monitoring**: AWS Secrets Manager for environment secrets and Amazon CloudWatch / AWS X-Ray for distributed tracing."*
 
----
-
-## 6. Top 7 Interview Questions & Model Answers
-
-### Q1: "Why did you choose Sanctum tokens instead of JWT?"
-> *"I chose Laravel Sanctum because it offers immediate token revocation out of the box. With stateless JWTs, invalidating a token on logout requires implementing token blacklists in Redis, adding distributed state complexity. Sanctum stores hashed tokens in the database, allowing instant revocation (`$user->currentAccessToken()->delete()`) while keeping the architecture lean and explainable."*
-
-### Q2: "How did you prevent N+1 queries when listing tasks?"
-> *"For regular users, tasks are retrieved with a single query scoped to `user_id`. When an administrator views tasks across all users, I explicitly eager-load owner details using `with('user:id,name,email')` and only select the specific projection columns needed, reducing memory usage and preventing N+1 SELECT queries."*
-
-### Q3: "How does the AI task assistant work, and what happens if Gemini is down?"
-> *"The AI assistant is isolated to the backend (`AiTaskSuggestionService`). When a user inputs a title and description, the service calls Google Gemini 1.5 Flash with a structured JSON schema, a 3.5-second timeout, and 1 retry. If the API key is not configured, or if the API times out or fails, the service transparently switches to a deterministic heuristic engine that classifies the task using keyword heuristics. Normal task creation is never blocked."*
-
-### Q4: "What is your pagination strategy and why?"
-> *"I implemented offset pagination with length-aware metadata (`current_page`, `last_page`, `total`, `per_page`). For a task manager, users need direct random-access jump navigation ('Page 2 of 4') and total count visibility. Because our composite B-Tree indexes satisfy both the WHERE filters and the ORDER BY clause, queries execute in under 0.1 ms."*
-
-### Q5: "How does the audit logging system work?"
-> *"We have an append-only `audit_logs` table without an `updated_at` column. It records actor ID, action type, target entity, IP address, user agent, and an immutable JSON metadata delta of modified attributes. When an admin updates or deletes a task belonging to another user, or when a user logs in or registers, the event is permanently recorded for security auditing."*
-
-### Q6: "Why did you use React Context instead of Redux?"
-> *"TaskFlow's global state is focused on authentication session and notification toasts. Introducing Redux Toolkit would add unnecessary boilerplate (actions, reducers, store slices) for a state that changes infrequently. Native React `AuthContext` with custom hooks provides clean, maintainable state management without bloated dependencies."*
-
-### Q7: "If this application had to scale to 5 million tasks, what would you change?"
-> *"1. Switch from offset pagination to keyset/cursor pagination (`WHERE id < cursor`) to maintain O(1) performance on deep pages.*  
-> *2. Offload the single-query dashboard counts to Redis cache with event-driven cache invalidation on task creation/completion.*  
-> *3. Implement database read replicas using Laravel's native read/write connection configuration.*  
-> *4. Push AI suggestions and email notifications to background queues running via Laravel Horizon and Redis."*
+### Q14: How would you split this monolith into microservices later?
+> *"We would decompose by business domain boundaries rather than arbitrary technical layers:
+> 1. **Identity & Auth Service**: Centralized authentication, OAuth2, and tenant membership.
+> 2. **Task & Project Service**: Core work management, Kanban boards, and timeline scheduling.
+> 3. **Notification & Activity Service**: Event-driven consumer subscribing to Kafka / RabbitMQ messages (e.g. `TaskAssigned`, `CommentCreated`) to send emails and push notifications.
+> 4. **AI & Analytics Service**: Python / FastAPI microservice leveraging specialized ML runtimes and LLM tooling without burdening PHP worker processes."*
