@@ -61,6 +61,28 @@ export default function AppLayout() {
         <main className="app-content">
           <Outlet context={{ refreshTrigger, onTaskUpdated: handleTaskUpdated }} />
         </main>
+
+        {/* Subtle Authenticated Footer */}
+        <footer
+          className="px-4 py-2 border-top d-flex justify-content-between align-items-center text-muted"
+          style={{ fontSize: '0.75rem', borderColor: 'var(--tf-border)', backgroundColor: 'var(--tf-bg-surface)' }}
+        >
+          <div className="d-flex align-items-center gap-2">
+            <span className="fw-semibold text-body">TaskFlow</span>
+            <span>v2.0.0</span>
+            <span>•</span>
+            <span className="d-inline-flex align-items-center gap-1 text-success">
+              <span className="hero-pill-dot bg-success d-inline-block" style={{ width: 6, height: 6 }}></span>
+              API Operational
+            </span>
+          </div>
+          <div className="d-flex align-items-center gap-3">
+            <a href="/openapi.yaml" target="_blank" rel="noreferrer" className="text-muted text-decoration-none hover-link">
+              OpenAPI Spec
+            </a>
+            <span className="text-muted">Northstar Engineering</span>
+          </div>
+        </footer>
       </div>
 
       {/* Command Palette Modal (Ctrl + K) */}

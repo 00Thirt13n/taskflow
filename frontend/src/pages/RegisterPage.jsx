@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import TaskFlowLogo from '../components/TaskFlowLogo';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -14,7 +15,7 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
-  const { showToast } = useToast();
+  const { addToast } = useToast();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -32,8 +33,8 @@ export default function RegisterPage() {
 
     try {
       await register(formData);
-      showToast('Account created successfully! Welcome to TaskFlow.');
-      navigate('/dashboard', { replace: true });
+      addToast('Account created successfully! Welcome to TaskFlow.', 'success');
+      navigate('/app/home', { replace: true });
     } catch (err) {
       if (err.response?.status === 422 && err.response.data?.errors) {
         setErrors(err.response.data.errors);
@@ -48,13 +49,11 @@ export default function RegisterPage() {
   return (
     <div className="row justify-content-center py-5">
       <div className="col-12 col-sm-10 col-md-8 col-lg-5">
-        <div className="card shadow-sm border p-4 bg-white">
+        <div className="tf-card p-4 shadow-sm border">
           <div className="text-center mb-4">
-            <div className="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-3 p-2 mb-2">
-              <i className="bi bi-person-plus-fill fs-4"></i>
-            </div>
-            <h4 className="fw-bold text-dark">Create Your Account</h4>
-            <p className="small text-muted mb-0">Join TaskFlow to organize projects and prioritize work</p>
+            <TaskFlowLogo size="lg" className="mb-3 justify-content-center" />
+            <h4 className="fw-bold text-body">Create Your Account</h4>
+            <p className="small text-muted mb-0">Join TaskFlow to plan projects and execute work</p>
           </div>
 
           {errors.general && (
@@ -66,15 +65,15 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} noValidate>
             <div className="mb-3">
-              <label htmlFor="regName" className="form-label fw-semibold small text-dark">
-                Full Name <span className="text-danger">*</span>
+              <label htmlFor="regName" className="form-label fw-semibold small text-body">
+                Full Name *
               </label>
               <input
                 type="text"
                 id="regName"
                 name="name"
                 className={`form-control ${errors.name ? 'is-invalid' : ''}`}
-                placeholder="Elena Rostova"
+                placeholder="e.g. Maya Lin"
                 value={formData.name}
                 onChange={handleChange}
                 required
@@ -85,15 +84,15 @@ export default function RegisterPage() {
             </div>
 
             <div className="mb-3">
-              <label htmlFor="regEmail" className="form-label fw-semibold small text-dark">
-                Email Address <span className="text-danger">*</span>
+              <label htmlFor="regEmail" className="form-label fw-semibold small text-body">
+                Work Email Address *
               </label>
               <input
                 type="email"
                 id="regEmail"
                 name="email"
                 className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                placeholder="elena@example.com"
+                placeholder="maya@company.com"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -103,36 +102,33 @@ export default function RegisterPage() {
             </div>
 
             <div className="mb-3">
-              <label htmlFor="regPassword" className="form-label fw-semibold small text-dark">
-                Password <span className="text-danger">*</span>
+              <label htmlFor="regPassword" className="form-label fw-semibold small text-body">
+                Password (min 8 characters) *
               </label>
               <input
                 type="password"
                 id="regPassword"
                 name="password"
                 className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                placeholder="At least 8 characters, letters & numbers"
+                placeholder="••••••••••••"
                 value={formData.password}
                 onChange={handleChange}
                 required
                 autoComplete="new-password"
               />
               {errors.password && <div className="invalid-feedback">{errors.password[0]}</div>}
-              <div className="form-text small text-muted">
-                Must be at least 8 characters with a mix of uppercase, lowercase, and numbers.
-              </div>
             </div>
 
             <div className="mb-4">
-              <label htmlFor="regConfirmPassword" className="form-label fw-semibold small text-dark">
-                Confirm Password <span className="text-danger">*</span>
+              <label htmlFor="regConfirm" className="form-label fw-semibold small text-body">
+                Confirm Password *
               </label>
               <input
                 type="password"
-                id="regConfirmPassword"
+                id="regConfirm"
                 name="password_confirmation"
                 className="form-control"
-                placeholder="Re-enter password"
+                placeholder="••••••••••••"
                 value={formData.password_confirmation}
                 onChange={handleChange}
                 required
@@ -150,8 +146,11 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <div className="text-center mt-4 pt-3 border-top small text-muted">
-            Already have an account? <Link to="/login" className="text-primary fw-medium text-decoration-none">Sign In</Link>
+          <div className="text-center mt-3 pt-2 border-top">
+            <span className="text-muted small">Already have an account? </span>
+            <Link to="/login" className="small fw-semibold text-primary text-decoration-none">
+              Sign in
+            </Link>
           </div>
         </div>
       </div>

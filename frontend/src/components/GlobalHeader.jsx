@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { notificationService } from '../services/notificationService';
 import { useAuth } from '../context/AuthContext';
 
@@ -9,6 +9,7 @@ export default function GlobalHeader({ onToggleSidebar, onOpenCommandPalette, on
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const notifRef = useRef(null);
 
   useEffect(() => {
     loadNotifications();
@@ -16,13 +17,28 @@ export default function GlobalHeader({ onToggleSidebar, onOpenCommandPalette, on
     return () => clearInterval(interval);
   }, []);
 
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    }
+    if (showNotifications) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showNotifications]);
+
   const loadNotifications = async () => {
     try {
       const data = await notificationService.getNotifications();
       setNotifications(data.data || []);
       setUnreadCount(data.unread_count || 0);
-    } catch (err) {
-      console.error('Failed to load notifications:', err);
+    } catch {
+      // Quiet recovery
     }
   };
 
@@ -33,8 +49,8 @@ export default function GlobalHeader({ onToggleSidebar, onOpenCommandPalette, on
         prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
-    } catch (err) {
-      console.error('Failed to mark notification read:', err);
+    } catch {
+      // Quiet recovery
     }
   };
 
@@ -43,22 +59,23 @@ export default function GlobalHeader({ onToggleSidebar, onOpenCommandPalette, on
       await notificationService.markAllAsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
       setUnreadCount(0);
-    } catch (err) {
-      console.error('Failed to mark all read:', err);
+    } catch {
+      // Quiet recovery
     }
   };
 
   // Derive breadcrumb path
   const getBreadcrumbs = () => {
     const path = location.pathname;
-    if (path.startsWith('/projects/')) {
-      return ['Workspace', 'Projects', 'Detail'];
-    }
-    if (path === '/my-work') return ['Workspace', 'My Work'];
-    if (path === '/tasks') return ['Workspace', 'Tasks'];
-    if (path === '/reports') return ['Workspace', 'Reports'];
-    if (path.startsWith('/admin')) return ['Workspace', 'Administration'];
-    return ['Workspace', 'Overview'];
+    if (path.includes('/projects/')) return ['Northstar', 'Projects', 'Deliverables'];
+    if (path.includes('/projects')) return ['Northstar', 'Projects'];
+    if (path.includes('/my-work')) return ['Northstar', 'My Work'];
+    if (path.includes('/tasks')) return ['Northstar', 'Tasks & Views'];
+    if (path.includes('/reports')) return ['Northstar', 'Reports & Velocity'];
+    if (path.includes('/admin/users')) return ['Administration', 'Team Roster'];
+    if (path.includes('/admin/audit-logs')) return ['Administration', 'Audit Logs'];
+    if (path.includes('/admin/system-health')) return ['Administration', 'System Health'];
+    return ['Northstar', 'Home Cockpit'];
   };
 
   const crumbs = getBreadcrumbs();
@@ -75,11 +92,11 @@ export default function GlobalHeader({ onToggleSidebar, onOpenCommandPalette, on
           <i className="bi bi-list fs-5"></i>
         </button>
 
-        <nav aria-label="breadcrumb" className="breadcrumb-nav d-none d-sm-flex">
+        <nav aria-label="breadcrumb" className="breadcrumb-nav d-none d-sm-flex align-items-center">
           {crumbs.map((crumb, idx) => (
             <React.Fragment key={crumb}>
-              {idx > 0 && <i className="bi bi-chevron-right" style={{ fontSize: '0.65rem' }}></i>}
-              <span className={idx === crumbs.length - 1 ? 'breadcrumb-item-active' : ''}>
+              {idx > 0 && <i className="bi bi-chevron-right text-muted mx-1" style={{ fontSize: '0.65rem' }}></i>}
+              <span className={idx === crumbs.length - 1 ? 'breadcrumb-item-active text-body fw-semibold' : 'text-muted'}>
                 {crumb}
               </span>
             </React.Fragment>
@@ -92,6 +109,7 @@ export default function GlobalHeader({ onToggleSidebar, onOpenCommandPalette, on
         <button
           className="header-search-btn w-100 justify-content-between"
           onClick={onOpenCommandPalette}
+          aria-label="Search or jump to command"
         >
           <span className="d-flex align-items-center gap-2">
             <i className="bi bi-search"></i>
@@ -104,16 +122,16 @@ export default function GlobalHeader({ onToggleSidebar, onOpenCommandPalette, on
       {/* Right Controls: Quick Create + Notification Center */}
       <div className="d-flex align-items-center gap-2">
         <button
-          className="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm"
+          className="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm fw-medium px-3"
           onClick={onOpenCreateTask}
-          title="Create new task (shortcut: C)"
+          title="Create new work item (shortcut: C)"
         >
           <i className="bi bi-plus-lg"></i>
-          <span className="d-none d-sm-inline">Create</span>
+          <span className="d-none d-sm-inline">New Item</span>
         </button>
 
         {/* Notifications Dropdown */}
-        <div className="position-relative">
+        <div className="position-relative" ref={notifRef}>
           <button
             className="btn btn-sm btn-link text-muted position-relative p-2"
             onClick={() => setShowNotifications(!showNotifications)}
@@ -132,7 +150,7 @@ export default function GlobalHeader({ onToggleSidebar, onOpenCommandPalette, on
 
           {showNotifications && (
             <div
-              className="position-absolute end-0 mt-2 bg-white rounded shadow-lg border"
+              className="position-absolute end-0 mt-2 rounded shadow-lg border"
               style={{
                 width: '320px',
                 zIndex: 1060,
@@ -140,11 +158,11 @@ export default function GlobalHeader({ onToggleSidebar, onOpenCommandPalette, on
                 borderColor: 'var(--tf-border)',
               }}
             >
-              <div className="p-3 border-bottom d-flex align-items-center justify-content-between">
-                <span className="fw-semibold small">Notifications</span>
+              <div className="p-3 border-bottom d-flex align-items-center justify-content-between" style={{ borderColor: 'var(--tf-border)' }}>
+                <span className="fw-semibold small text-body">Notifications</span>
                 {unreadCount > 0 && (
                   <button
-                    className="btn btn-sm btn-link text-primary p-0"
+                    className="btn btn-sm btn-link text-primary p-0 text-decoration-none"
                     style={{ fontSize: '0.75rem' }}
                     onClick={handleMarkAllRead}
                   >
@@ -157,17 +175,16 @@ export default function GlobalHeader({ onToggleSidebar, onOpenCommandPalette, on
                 {notifications.map((n) => (
                   <div
                     key={n.id}
-                    className={`p-3 border-bottom small ${
-                      !n.is_read ? 'bg-light' : ''
-                    }`}
+                    className="p-3 border-bottom small"
                     style={{
                       cursor: 'pointer',
+                      borderColor: 'var(--tf-border)',
                       backgroundColor: !n.is_read ? 'var(--tf-primary-subtle)' : 'transparent',
                     }}
                     onClick={() => handleMarkAsRead(n.id)}
                   >
                     <div className="d-flex justify-content-between align-items-start mb-1">
-                      <strong className="text-truncate" style={{ maxWidth: '210px' }}>
+                      <strong className="text-truncate text-body" style={{ maxWidth: '210px' }}>
                         {n.title}
                       </strong>
                       <span className="text-muted" style={{ fontSize: '0.65rem' }}>

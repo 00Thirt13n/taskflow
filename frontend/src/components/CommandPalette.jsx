@@ -48,8 +48,8 @@ export default function CommandPalette({ isOpen, onClose, onOpenCreateTask }) {
       try {
         const data = await searchService.search(query);
         setResults(data);
-      } catch (err) {
-        console.error('Command palette search error:', err);
+      } catch {
+        // Quiet catch for user typing cancel
       } finally {
         setLoading(false);
       }
@@ -68,45 +68,45 @@ export default function CommandPalette({ isOpen, onClose, onOpenCreateTask }) {
   const defaultActions = [
     {
       id: 'create-task',
-      label: 'Create new task',
+      label: 'Create new work item',
       icon: 'bi-plus-circle-fill text-primary',
       shortcut: 'C',
       action: () => onOpenCreateTask(),
     },
     {
       id: 'go-dashboard',
-      label: 'Go to Overview Dashboard',
-      icon: 'bi-grid-1x2',
-      shortcut: 'G D',
-      action: () => navigate('/dashboard'),
+      label: 'Go to Home Cockpit',
+      icon: 'bi-house-door text-primary',
+      shortcut: 'G H',
+      action: () => navigate('/app/home'),
     },
     {
       id: 'go-my-work',
       label: 'Go to My Work',
       icon: 'bi-check2-circle text-success',
       shortcut: 'G W',
-      action: () => navigate('/my-work'),
+      action: () => navigate('/app/my-work'),
     },
     {
       id: 'go-projects',
       label: 'Go to Projects',
-      icon: 'bi-folder text-warning',
+      icon: 'bi-folder2-open text-warning',
       shortcut: 'G P',
-      action: () => navigate('/projects'),
+      action: () => navigate('/app/projects'),
     },
     {
       id: 'go-tasks',
-      label: 'Go to All Tasks',
-      icon: 'bi-list-task',
+      label: 'Go to Tasks & Views',
+      icon: 'bi-kanban',
       shortcut: 'G T',
-      action: () => navigate('/tasks'),
+      action: () => navigate('/app/tasks'),
     },
     {
       id: 'go-reports',
-      label: 'Go to Analytics & Reports',
+      label: 'Go to Analytics & Velocity',
       icon: 'bi-bar-chart-line text-info',
       shortcut: 'G R',
-      action: () => navigate('/reports'),
+      action: () => navigate('/app/reports'),
     },
     {
       id: 'toggle-theme',
@@ -155,7 +155,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCreateTask }) {
                 <div
                   key={`task-${task.id}`}
                   className="command-item"
-                  onClick={() => handleAction(() => navigate(`/tasks?task=${task.id}`))}
+                  onClick={() => handleAction(() => navigate(`/app/tasks?task=${task.id}`))}
                 >
                   <div className="d-flex align-items-center gap-2">
                     <span className="badge bg-secondary font-monospace" style={{ fontSize: '0.7rem' }}>
@@ -178,7 +178,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCreateTask }) {
                 <div
                   key={`proj-${proj.id}`}
                   className="command-item"
-                  onClick={() => handleAction(() => navigate(`/projects/${proj.id}`))}
+                  onClick={() => handleAction(() => navigate(`/app/projects/${proj.id}`))}
                 >
                   <div className="d-flex align-items-center gap-2">
                     <i className={`bi bi-${proj.icon || 'folder'}`} style={{ color: proj.color }}></i>

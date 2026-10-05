@@ -26,53 +26,53 @@ class EnterpriseWorkspaceSeeder extends Seeder
         $adminRole = Role::where('name', UserRole::Admin->value)->first();
         $userRole = Role::where('name', UserRole::User->value)->first();
 
-        // 1. Ensure team users exist
-        $alex = User::firstOrCreate(
+        // 1. Ensure team users exist (Northstar Engineering Team)
+        $alex = User::updateOrCreate(
             ['email' => 'admin@taskflow.dev'],
             [
-                'name' => 'Alexander Vance',
+                'name' => 'Maya Lin',
                 'password' => Hash::make('Password123!'),
                 'role_id' => $adminRole->id,
                 'email_verified_at' => now(),
             ]
         );
 
-        $elena = User::firstOrCreate(
+        $elena = User::updateOrCreate(
             ['email' => 'demo@taskflow.dev'],
             [
-                'name' => 'Elena Rostova',
+                'name' => 'Arjun Patel',
                 'password' => Hash::make('Password123!'),
                 'role_id' => $userRole->id,
                 'email_verified_at' => now(),
             ]
         );
 
-        $sarah = User::firstOrCreate(
+        $sarah = User::updateOrCreate(
             ['email' => 'sarah@taskflow.dev'],
             [
-                'name' => 'Sarah Chen',
+                'name' => 'Sofia Rossi',
                 'password' => Hash::make('Password123!'),
                 'role_id' => $userRole->id,
                 'email_verified_at' => now(),
             ]
         );
 
-        $michael = User::firstOrCreate(
+        $michael = User::updateOrCreate(
             ['email' => 'michael@taskflow.dev'],
             [
-                'name' => 'Michael Brown',
+                'name' => 'Daniel Kim',
                 'password' => Hash::make('Password123!'),
                 'role_id' => $userRole->id,
                 'email_verified_at' => now(),
             ]
         );
 
-        // 2. Primary Workspace
-        $workspace = Workspace::firstOrCreate(
-            ['slug' => 'taskflow-engineering'],
+        // 2. Primary Workspace: Northstar Engineering
+        $workspace = Workspace::updateOrCreate(
+            ['slug' => 'northstar-engineering'],
             [
-                'name' => 'TaskFlow Engineering',
-                'description' => 'Core product engineering, infrastructure, and design platform.',
+                'name' => 'Northstar Engineering',
+                'description' => 'Core engineering platform, cloud infrastructure, and product design.',
                 'owner_id' => $alex->id,
             ]
         );
