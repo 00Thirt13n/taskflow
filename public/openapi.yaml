@@ -1,0 +1,329 @@
+openapi: 3.0.3
+info:
+  title: TaskFlow REST API
+  description: High-performance, production-ready Task Management REST API built with Laravel 11, Sanctum, and MySQL 8.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000/api
+    description: Local development API server
+  - url: /api
+    description: Current origin API proxy
+
+paths:
+  /health:
+    get:
+      summary: System & Database Health Check
+      description: Returns operational status, database connectivity, latency, memory usage, and uptime.
+      responses:
+        '200':
+          description: System operational and database healthy
+          content:
+            application/json:
+              example:
+                status: "ok"
+                timestamp: "2026-10-05T17:00:00Z"
+                service: "TaskFlow"
+                database:
+                  status: "healthy"
+                  latency_ms: 1.25
+                memory_usage_mb: 18.5
+                uptime: "active"
+        '503':
+          description: Degraded system or database unreachable
+
+  /register:
+    post:
+      summary: Register a new user
+      description: Creates a standard user account and issues a personal access token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, password_confirmation]
+              properties:
+                name:
+                  type: string
+                  example: Elena Rostova
+                email:
+                  type: string
+                  format: email
+                  example: elena@taskflow.dev
+                password:
+                  type: string
+                  format: password
+                  example: Password123!
+                password_confirmation:
+                  type: string
+                  format: password
+                  example: Password123!
+      responses:
+        '201':
+          description: Registration successful
+        '422':
+          description: Validation error
+
+  /login:
+    post:
+      summary: Authenticate user
+      description: Validates email and password, returning user profile and Bearer token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  example: admin@taskflow.dev
+                password:
+                  type: string
+                  example: Password123!
+      responses:
+        '200':
+          description: Authentication successful
+        '401':
+          description: Invalid credentials
+
+  /logout:
+    post:
+      summary: Revoke access token
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logged out successfully
+
+  /me:
+    get:
+      summary: Get current authenticated user
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile and role permissions
+
+  /tasks:
+    get:
+      summary: List filtered and paginated tasks
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [todo, in-progress, done]
+        - name: priority
+          in: query
+          schema:
+            type: string
+            enum: [low, medium, high]
+        - name: due_date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+            enum: [created_at, due_date]
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Paginated tasks collection
+
+    post:
+      summary: Create a new task
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, status, priority]
+              properties:
+                title:
+                  type: string
+                  example: Deploy Nginx reverse proxy
+                description:
+                  type: string
+                  example: Configure upstream fastcgi pass and SSL termination
+                status:
+                  type: string
+                  enum: [todo, in-progress, done]
+                  example: todo
+                priority:
+                  type: string
+                  enum: [low, medium, high]
+                  example: high
+                due_date:
+                  type: string
+                  format: date
+                  example: "2026-10-15"
+      responses:
+        '201':
+          description: Task created
+        '422':
+          description: Validation failure
+
+  /tasks/{id}:
+    get:
+      summary: Get specific task by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Task details
+        '403':
+          description: Forbidden (IDOR prevention)
+        '404':
+          description: Task not found
+
+    put:
+      summary: Update task
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Task updated
+        '403':
+          description: Forbidden
+
+    delete:
+      summary: Delete task
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Task deleted
+        '403':
+          description: Forbidden
+
+  /tasks/{id}/status:
+    patch:
+      summary: Quick update task status
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [todo, in-progress, done]
+      responses:
+        '200':
+          description: Status updated
+
+  /tasks/stats:
+    get:
+      summary: Aggregate dashboard metrics
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Task counts (total, todo, in_progress, done, high_priority, overdue)
+
+  /ai/suggest:
+    post:
+      summary: AI-assisted task classification and priority suggestion
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                  example: Urgent server reboot before midnight
+                description:
+                  type: string
+      responses:
+        '200':
+          description: AI classification suggestion
+
+  /admin/users:
+    get:
+      summary: List system users with role and task counts
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Users list
+        '403':
+          description: Admin role required
+
+  /admin/audit-logs:
+    get:
+      summary: Paginated administrative audit logs
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Audit logs collection
+        '403':
+          description: Admin role required
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum Token
