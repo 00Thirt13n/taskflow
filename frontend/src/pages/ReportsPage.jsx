@@ -63,7 +63,7 @@ export default function ReportsPage() {
       <div className="row g-3 mb-4">
         <div className="col-12 col-sm-6 col-xl-3">
           <div className="tf-card p-3">
-            <div className="text-muted small text-uppercase">Total Deliverables</div>
+            <div className="text-muted small fw-semibold">Total Deliverables</div>
             <div className="fs-3 fw-bold mt-1">{totalTasks}</div>
             <div className="small text-muted mt-1">{status.todo} todo • {status.in_progress} in progress</div>
           </div>
@@ -71,7 +71,7 @@ export default function ReportsPage() {
 
         <div className="col-12 col-sm-6 col-xl-3">
           <div className="tf-card p-3">
-            <div className="text-muted small text-uppercase">Completion Rate</div>
+            <div className="text-muted small fw-semibold">Completion Rate</div>
             <div className="fs-3 fw-bold text-success mt-1">{completionRate}%</div>
             <div className="small text-muted mt-1">{status.done} tasks completed</div>
           </div>
@@ -79,7 +79,7 @@ export default function ReportsPage() {
 
         <div className="col-12 col-sm-6 col-xl-3">
           <div className="tf-card p-3">
-            <div className="text-muted small text-uppercase">Active Projects</div>
+            <div className="text-muted small fw-semibold">Active Projects</div>
             <div className="fs-3 fw-bold text-primary mt-1">{data?.projects?.length || 0}</div>
             <div className="small text-muted mt-1">Cross-functional initiatives</div>
           </div>
@@ -87,7 +87,7 @@ export default function ReportsPage() {
 
         <div className="col-12 col-sm-6 col-xl-3">
           <div className="tf-card p-3">
-            <div className="text-muted small text-uppercase">Team Capacity</div>
+            <div className="text-muted small fw-semibold">Team Capacity</div>
             <div className="fs-3 fw-bold text-info mt-1">{data?.team_workload?.length || 0}</div>
             <div className="small text-muted mt-1">Active team contributors</div>
           </div>
@@ -167,7 +167,7 @@ export default function ReportsPage() {
         <div className="col-12">
           <div className="tf-card overflow-hidden">
             <div className="tf-card-header">
-              <span className="fw-bold small text-uppercase">Project Health &amp; Execution Progress</span>
+              <span className="fw-bold small text-body">Project Health &amp; Execution Progress</span>
             </div>
             <div className="table-responsive">
               <table className="tf-table">
@@ -177,7 +177,7 @@ export default function ReportsPage() {
                     <th>Key</th>
                     <th>Health</th>
                     <th>Progress</th>
-                    <th>Total Tasks</th>
+                    <th>Total tasks</th>
                     <th>Completed</th>
                   </tr>
                 </thead>
@@ -191,7 +191,7 @@ export default function ReportsPage() {
                         ></span>
                         {p.name}
                       </td>
-                      <td><span className="badge bg-secondary font-monospace">{p.key}</span></td>
+                      <td><span className="badge bg-secondary fw-semibold" style={{ fontVariantNumeric: 'tabular-nums' }}>{p.key}</span></td>
                       <td>
                         <span className={`badge ${
                           p.health === 'Healthy' ? 'bg-success' : p.health === 'At Risk' ? 'bg-warning text-dark' : 'bg-danger'

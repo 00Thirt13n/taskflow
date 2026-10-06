@@ -116,7 +116,7 @@ export default function AdminCenterPage() {
       {activeTab === 'users' && (
         <div className="tf-card overflow-hidden">
           <div className="tf-card-header">
-            <span className="fw-bold small text-uppercase">Workspace Members ({users.length})</span>
+            <span className="fw-bold small text-body">Workspace Members ({users.length})</span>
           </div>
 
           <div className="table-responsive">
@@ -251,7 +251,7 @@ export default function AdminCenterPage() {
                       <div className="col-4"><strong>Timestamp:</strong> {inspectingLog.created_at}</div>
                     </div>
 
-                    <div className="fw-semibold small text-muted text-uppercase mb-2">Raw Metadata &amp; Changes Payload</div>
+                    <div className="fw-semibold small text-muted mb-2">Raw Metadata &amp; Changes Payload</div>
                     <pre
                       className="p-3 bg-light rounded border text-muted"
                       style={{ backgroundColor: 'var(--tf-bg-subtle)', maxHeight: '300px', overflowY: 'auto' }}

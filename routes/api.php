@@ -51,8 +51,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/reports/overview', [ReportController::class, 'overview'])->name('api.reports.overview');
     Route::get('/reports/export', [ReportController::class, 'export'])->name('api.reports.export');
 
-    // Task Bulk Operations
-    Route::post('/tasks/bulk', [TaskController::class, 'bulk'])->name('api.tasks.bulk');
+    // Task Bulk Operations (Throttled: 30 requests per minute)
+    Route::middleware(['throttle:30,1'])->group(function () {
+        Route::post('/tasks/bulk', [TaskController::class, 'bulk'])->name('api.tasks.bulk');
+    });
 
     // Task CRUD Operations
     Route::apiResource('tasks', TaskController::class);
@@ -78,8 +80,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/saved-views', [SavedViewController::class, 'store'])->name('api.saved-views.store');
     Route::delete('/saved-views/{savedView}', [SavedViewController::class, 'destroy'])->name('api.saved-views.destroy');
 
-    // AI-Powered Assistant Actions
-    Route::prefix('ai')->name('api.ai.')->group(function () {
+    // AI-Powered Assistant Actions (Throttled: 30 requests per minute)
+    Route::middleware(['throttle:30,1'])->prefix('ai')->name('api.ai.')->group(function () {
         Route::post('/suggest', [AiTaskController::class, 'suggest'])->name('suggest');
         Route::post('/subtasks', [AiTaskController::class, 'subtasks'])->name('subtasks');
         Route::post('/improve-description', [AiTaskController::class, 'improveDescription'])->name('improve-description');

@@ -12,12 +12,13 @@ TaskFlow is an enterprise-grade commercial work management platform engineered w
 
 ---
 
-## 1. Live Demo & Evaluation Credentials
+## 1. Public Review & Live Demo Credentials
 
-- **Web Application URL**: [http://localhost:5173](http://localhost:5173) (or deployed domain)
-- **API Base Endpoint**: [http://localhost:8000/api](http://localhost:8000/api)
-- **Interactive OpenAPI Specification**: [`public/openapi.yaml`](file:///var/www/html/task_manager/public/openapi.yaml)
-- **Live System Health Endpoint**: [http://localhost:8000/api/health](http://localhost:8000/api/health)
+- 🌐 **Public Live Review URL**: [https://taskflow.pochyaa.com/](https://taskflow.pochyaa.com/)
+- ⚡ **API Base Endpoint**: [https://taskflow.pochyaa.com/api](https://taskflow.pochyaa.com/api)
+- 🟢 **Live System Health Endpoint**: [https://taskflow.pochyaa.com/api/health](https://taskflow.pochyaa.com/api/health)
+- 📖 **Interactive OpenAPI Specification**: [https://taskflow.pochyaa.com/openapi.yaml](https://taskflow.pochyaa.com/openapi.yaml) (or [`public/openapi.yaml`](file:///var/www/html/task_manager/public/openapi.yaml))
+- 💻 **Local Development URL**: `http://localhost:5173` (Vite) / `http://localhost:8000` (Laravel)
 
 ### 🔑 Instant 1-Click Evaluation Personas (Northstar Engineering)
 The login screen features instant one-click persona fill buttons for immediate evaluation:
@@ -155,7 +156,7 @@ Visit `http://localhost:5173` in your browser.
 ```bash
 php artisan test
 ```
-*Current test suite: **41 passing tests, 160 assertions (0 failures)**.*
+*Current test suite: **47 passing tests, 178 assertions (0 failures)**.*
 
 ### Run Frontend Component Tests (Vitest)
 ```bash

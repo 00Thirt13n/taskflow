@@ -106,25 +106,25 @@ export default function ProjectDetailPage() {
       <div className="row g-3 mb-4">
         <div className="col-6 col-md-3">
           <div className="tf-card p-3 text-center">
-            <div className="text-muted small text-uppercase">Total Tasks</div>
+            <div className="text-muted small fw-medium">Total tasks</div>
             <div className="fs-4 fw-bold">{project.tasks_count}</div>
           </div>
         </div>
         <div className="col-6 col-md-3">
           <div className="tf-card p-3 text-center">
-            <div className="text-muted small text-uppercase">Completed</div>
+            <div className="text-muted small fw-medium">Completed</div>
             <div className="fs-4 fw-bold text-success">{project.completed_tasks_count}</div>
           </div>
         </div>
         <div className="col-6 col-md-3">
           <div className="tf-card p-3 text-center">
-            <div className="text-muted small text-uppercase">In Progress</div>
+            <div className="text-muted small fw-medium">In progress</div>
             <div className="fs-4 fw-bold text-primary">{project.in_progress_tasks_count}</div>
           </div>
         </div>
         <div className="col-6 col-md-3">
           <div className="tf-card p-3 text-center">
-            <div className="text-muted small text-uppercase">Overdue</div>
+            <div className="text-muted small fw-medium">Overdue</div>
             <div className={`fs-4 fw-bold ${project.overdue_tasks_count > 0 ? 'text-danger' : 'text-muted'}`}>
               {project.overdue_tasks_count}
             </div>
@@ -135,7 +135,7 @@ export default function ProjectDetailPage() {
       {/* Tasks List */}
       <div className="tf-card overflow-hidden">
         <div className="tf-card-header d-flex justify-content-between align-items-center">
-          <span className="fw-bold small text-uppercase">Project Deliverables ({tasks.length})</span>
+          <span className="fw-semibold small">Project deliverables ({tasks.length})</span>
           <Link to={`/tasks?project_id=${project.id}`} className="btn btn-sm btn-link text-primary p-0">
             Open in Task Views <i className="bi bi-arrow-right ms-1"></i>
           </Link>

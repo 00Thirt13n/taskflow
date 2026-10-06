@@ -190,7 +190,7 @@ export default function TaskDetailDrawer({ taskId, onClose, onTaskUpdated }) {
         {/* Drawer Header */}
         <div className="drawer-header">
           <div className="d-flex align-items-center gap-2">
-            <span className="badge bg-secondary font-monospace" style={{ fontSize: '0.8125rem' }}>
+            <span className="badge bg-secondary fw-semibold" style={{ fontSize: '0.8125rem', fontVariantNumeric: 'tabular-nums' }}>
               {task?.task_key || `TASK-${taskId}`}
             </span>
             {task?.project && (
@@ -354,7 +354,7 @@ export default function TaskDetailDrawer({ taskId, onClose, onTaskUpdated }) {
                 {/* Description */}
                 <div>
                   <div className="d-flex align-items-center justify-content-between mb-2">
-                    <span className="fw-semibold small text-muted text-uppercase">Description</span>
+                    <span className="fw-semibold small text-muted">Description</span>
                     <button
                       className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
                       onClick={handleAiImproveDescription}
@@ -373,7 +373,7 @@ export default function TaskDetailDrawer({ taskId, onClose, onTaskUpdated }) {
                 {/* Subtasks Section */}
                 <div>
                   <div className="d-flex align-items-center justify-content-between mb-2">
-                    <span className="fw-semibold small text-muted text-uppercase">
+                    <span className="fw-semibold small text-muted">
                       Subtasks ({task.subtasks?.filter((s) => s.status === 'done').length || 0}/{task.subtasks?.length || 0})
                     </span>
                     <button
@@ -426,7 +426,7 @@ export default function TaskDetailDrawer({ taskId, onClose, onTaskUpdated }) {
                 {/* Dependencies / Blockers */}
                 {task.blocked_by && task.blocked_by.length > 0 && (
                   <div>
-                    <span className="fw-semibold small text-muted text-uppercase mb-2 d-block">Blocked By</span>
+                    <span className="fw-semibold small text-muted mb-2 d-block">Blocked by</span>
                     <div className="d-flex flex-wrap gap-2">
                       {task.blocked_by.map((dep) => (
                         <span key={dep.id} className="badge bg-danger-subtle text-danger border border-danger-subtle p-2">

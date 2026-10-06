@@ -24,292 +24,340 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="py-4">
-      {/* 1. HERO SECTION */}
-      <section className="text-center py-5">
-        <div className="mb-3">
-          <span className="hero-pill-badge">
-            <span className="hero-pill-dot"></span>
-            Modern Work Management Platform v2.0
-          </span>
+    <div className="tf-page-container py-5">
+      {/* ── 1. HERO SECTION (POCHYAA PARADIGM) ── */}
+      <section className="text-center pt-4 pb-5">
+        {/* Eyebrow Pill with Animated Ping Beacon */}
+        <div className="d-flex justify-content-center mb-4">
+          <div className="pochyaa-eyebrow">
+            <span className="ping-beacon">
+              <span className="ping-beacon-wave"></span>
+              <span className="ping-beacon-dot"></span>
+            </span>
+            <span>CONTINUOUS WORKSPACE DISPATCH ENGINE</span>
+            <span style={{ color: '#64748b' }}>•</span>
+            <span style={{ color: '#38bdf8' }}>Sub-0.09ms Precision</span>
+          </div>
         </div>
 
-        <h1 className="hero-headline mx-auto" style={{ maxWidth: '880px' }}>
-          Turn scattered work into <span className="hero-headline-gradient">clear execution</span>.
+        {/* Hero Headline */}
+        <h1 className="hero-headline mx-auto" style={{ maxWidth: '940px' }}>
+          Stop running engineering projects on spreadsheets <span className="text-gradient-blue">before release deadlines</span> slip.
         </h1>
 
+        {/* Hero Subhead */}
         <p className="hero-subhead">
-          TaskFlow gives engineering and product teams one connected workspace to plan projects, prioritize what matters, collaborate in context, and understand what happens next.
+          Commercial engineering teams lose <strong className="text-body fw-bold">18% to 28%</strong> of sprint velocity to untracked blockers, context switching, and phantom dependencies. TaskFlow unifies milestone roadmaps, fluid Kanban swimlanes, and forensic audit logs in under <strong className="text-body fw-bold">12ms</strong>.
         </p>
 
-        <div className="d-flex justify-content-center align-items-center gap-3 flex-wrap mb-4">
+        {/* Hero Action Buttons */}
+        <div className="d-flex justify-content-center align-items-center gap-3 flex-wrap mt-4 mb-4">
           {isAuthenticated ? (
-            <Link to="/app/home" className="btn btn-primary btn-lg px-4 fw-semibold shadow-sm">
-              <i className="bi bi-grid-fill me-2"></i> Enter Workspace
+            <Link to="/app/home" className="btn-pochyaa-primary">
+              <i className="bi bi-grid-fill me-1"></i>
+              <span>Enter Workspace</span>
+              <i className="bi bi-arrow-right ms-1"></i>
             </Link>
           ) : (
             <>
               <button
-                className="btn btn-primary btn-lg px-4 fw-semibold shadow-sm"
+                className="btn-pochyaa-primary"
                 onClick={() => handleQuickLogin('demo@taskflow.dev', 'Password123!', 'Lead Engineer')}
                 disabled={loginLoading}
               >
-                {loginLoading ? 'Entering...' : 'Explore Live Demo'}
-                <i className="bi bi-arrow-right ms-2"></i>
+                <span>{loginLoading ? 'Entering Workspace...' : 'Deploy Work Management Engine'}</span>
+                <i className="bi bi-arrow-right ms-1"></i>
               </button>
-              <Link to="/login" className="btn btn-outline-secondary btn-lg px-4 fw-medium">
-                Sign In
-              </Link>
+              <a href="#console-preview" className="btn-pochyaa-secondary">
+                <i className="bi bi-eye text-primary me-1"></i>
+                <span>Inspect Workspace Console</span>
+              </a>
             </>
           )}
-          <Link to="/product" className="btn btn-link text-decoration-none text-muted fw-medium">
-            See how it works <i className="bi bi-chevron-right small"></i>
-          </Link>
         </div>
 
-        <div className="d-flex justify-content-center align-items-center gap-4 text-muted small flex-wrap pt-2">
-          <span><i className="bi bi-check-circle-fill text-success me-1"></i> Built for modern teams</span>
-          <span><i className="bi bi-shield-check text-primary me-1"></i> Secure by architecture</span>
-          <span><i className="bi bi-stars text-info me-1"></i> Grounded AI assistance</span>
+        {/* Guarantee Ribbon */}
+        <div className="d-flex flex-wrap align-items-center justify-content-center gap-4 text-xs font-monospace mt-3 text-secondary" style={{ fontSize: '0.8rem' }}>
+          <div className="d-flex align-items-center gap-2">
+            <i className="bi bi-check2 text-success fw-bold"></i>
+            <span>Deterministic REST & MySQL • Sub-0.09ms B-Tree Queries</span>
+          </div>
+          <div className="d-flex align-items-center gap-2">
+            <i className="bi bi-check2 text-success fw-bold"></i>
+            <span>Strict Role-Based Access Isolation (RBAC)</span>
+          </div>
+          <div className="d-flex align-items-center gap-2">
+            <i className="bi bi-check2 text-success fw-bold"></i>
+            <span>Append-Only Forensic Activity Trail</span>
+          </div>
         </div>
       </section>
 
-      {/* 2. REAL INTERACTIVE PRODUCT SHOWCASE WINDOW */}
-      <section className="my-5">
-        <div className="hero-product-frame mx-auto" style={{ maxWidth: '1080px' }}>
-          {/* Browser Chrome Header */}
-          <div className="browser-header-bar">
-            <div className="window-dots">
-              <span className="window-dot dot-red"></span>
-              <span className="window-dot dot-yellow"></span>
-              <span className="window-dot dot-green"></span>
+      {/* ── 2. HERO INTERACTIVE CONSOLE WINDOW (POCHYAA CONSOLE SURFACE) ── */}
+      <section id="console-preview" className="my-5">
+        <div className="console-window-frame mx-auto" style={{ maxWidth: '1120px' }}>
+          {/* Top Window Chrome */}
+          <div className="console-window-chrome">
+            <div className="d-flex align-items-center gap-2">
+              <span className="traffic-dot" style={{ backgroundColor: '#f43f5e' }}></span>
+              <span className="traffic-dot" style={{ backgroundColor: '#f59e0b' }}></span>
+              <span className="traffic-dot" style={{ backgroundColor: '#10b981' }}></span>
+              <span className="ms-2 font-monospace small" style={{ color: '#94a3b8', fontSize: '0.78rem' }}>
+                taskflow_engine :: run_execution_dispatch (sync)
+              </span>
             </div>
-
-            <div className="browser-url-pill d-none d-sm-flex">
-              <i className="bi bi-lock-fill text-success"></i>
-              <span>https://app.taskflow.dev/northstar-engineering/projects</span>
-            </div>
-
-            {/* Interactive View Switcher Tabs */}
-            <div className="d-flex align-items-center gap-1">
-              <button
-                className={`showcase-tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
-                onClick={() => setActiveTab('overview')}
+            <div className="d-flex align-items-center gap-2">
+              <span
+                className="font-monospace small px-2 py-0.5 rounded fw-semibold"
+                style={{
+                  fontSize: '0.72rem',
+                  background: 'rgba(16, 185, 129, 0.12)',
+                  color: '#34d399',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                }}
               >
-                <i className="bi bi-speedometer2 me-1"></i> Overview
-              </button>
-              <button
-                className={`showcase-tab-btn ${activeTab === 'board' ? 'active' : ''}`}
-                onClick={() => setActiveTab('board')}
-              >
-                <i className="bi bi-kanban me-1"></i> Kanban
-              </button>
-              <button
-                className={`showcase-tab-btn ${activeTab === 'timeline' ? 'active' : ''}`}
-                onClick={() => setActiveTab('timeline')}
-              >
-                <i className="bi bi-bar-chart-steps me-1"></i> Timeline
-              </button>
+                ENGINE ONLINE • 0.08ms
+              </span>
             </div>
           </div>
 
-          {/* Rendered Interactive View Showcase */}
-          <div className="p-3 p-md-4" style={{ backgroundColor: 'var(--tf-bg-main)', minHeight: '380px' }}>
-            {/* VIEW 1: OVERVIEW COCKPIT */}
-            {activeTab === 'overview' && (
-              <div>
-                <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                  <div>
-                    <h5 className="fw-bold mb-0 text-body">Northstar Engineering • Executive Cockpit</h5>
-                    <span className="text-muted small">Sprint 24 • Target Delivery: Friday, Nov 14</span>
+          {/* Console Surface Content */}
+          <div className="console-window-surface">
+            {/* KPI Status Row */}
+            <div className="row g-3 mb-4">
+              <div className="col-12 col-md-4">
+                <div className="p-3 rounded-3" style={{ background: 'rgba(15, 23, 42, 0.85)', border: '1px solid rgba(51, 65, 85, 0.7)' }}>
+                  <div className="text-muted small font-monospace">Active Sprint Scope</div>
+                  <div className="text-white fw-bold fs-5 mt-1 font-monospace">SPRINT-2026-Q4</div>
+                  <div className="small text-muted font-monospace mt-1">Initiative: Customer Portal v2 (PORT)</div>
+                </div>
+              </div>
+
+              <div className="col-12 col-md-4">
+                <div className="p-3 rounded-3" style={{ background: 'rgba(15, 23, 42, 0.85)', border: '1px solid rgba(51, 65, 85, 0.7)' }}>
+                  <div className="text-muted small font-monospace">Milestone Delivery Window</div>
+                  <div className="text-white fw-bold fs-5 mt-1 font-monospace">Nov 15, 2026</div>
+                  <div className="small text-muted font-monospace mt-1">Velocity: 88% Target Reached • 0 Delayed</div>
+                </div>
+              </div>
+
+              <div className="col-12 col-md-4">
+                <div
+                  className="p-3 rounded-3 d-flex flex-column justify-content-between"
+                  style={{
+                    background: 'rgba(59, 130, 246, 0.08)',
+                    border: '1px solid rgba(59, 130, 246, 0.4)',
+                  }}
+                >
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span className="small font-monospace fw-semibold" style={{ color: '#93c5fd' }}>Blocker Sentinel</span>
+                    <span className="badge font-monospace" style={{ background: '#2563eb', color: '#fff', fontSize: '9px' }}>ACTIVE GATE</span>
                   </div>
-                  <div className="d-flex gap-2">
-                    <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
-                      <i className="bi bi-heart-pulse-fill me-1"></i> Overall Health: 94%
-                    </span>
-                    <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">
-                      Velocity: +18 Tasks Net
-                    </span>
+                  <div className="fs-4 fw-bold font-monospace mt-1" style={{ color: '#38bdf8' }}>0 Critical Drift</div>
+                  <div className="small font-monospace" style={{ color: '#94a3b8' }}>Execution state synced via REST</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Interactive View Selector Tabs */}
+            <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2" style={{ borderColor: 'rgba(51, 65, 85, 0.6)' }}>
+              <div className="d-flex align-items-center gap-1">
+                <button
+                  className={`btn btn-sm ${activeTab === 'board' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                  style={{ borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600 }}
+                  onClick={() => setActiveTab('board')}
+                >
+                  <i className="bi bi-kanban me-1"></i> Kanban Swimlanes
+                </button>
+                <button
+                  className={`btn btn-sm ${activeTab === 'overview' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                  style={{ borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600 }}
+                  onClick={() => setActiveTab('overview')}
+                >
+                  <i className="bi bi-speedometer2 me-1"></i> Executive Cockpit
+                </button>
+                <button
+                  className={`btn btn-sm ${activeTab === 'timeline' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                  style={{ borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600 }}
+                  onClick={() => setActiveTab('timeline')}
+                >
+                  <i className="bi bi-bar-chart-steps me-1"></i> Gantt Timeline
+                </button>
+              </div>
+
+              <div className="d-none d-sm-flex align-items-center gap-2 text-muted small font-monospace" style={{ fontSize: '0.75rem' }}>
+                <i className="bi bi-shield-check text-success"></i>
+                <span>Tenant: northstar-engineering (Org #1)</span>
+              </div>
+            </div>
+
+            {/* TAB CONTENT: KANBAN BOARD */}
+            {activeTab === 'board' && (
+              <div className="pt-2">
+                <div className="d-flex gap-3 overflow-x-auto pb-2">
+                  {/* Column 1: Todo */}
+                  <div className="flex-fill" style={{ minWidth: '230px' }}>
+                    <div className="d-flex justify-content-between align-items-center mb-2 px-1">
+                      <span className="small fw-semibold text-muted font-monospace">TO DO</span>
+                      <span className="badge rounded-pill font-monospace" style={{ background: 'rgba(51, 65, 85, 0.8)', color: '#94a3b8' }}>2</span>
+                    </div>
+                    <div className="d-flex flex-column gap-2">
+                      <div className="p-3 rounded-3" style={{ background: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(51, 65, 85, 0.7)' }}>
+                        <div className="d-flex justify-content-between small mb-1">
+                          <span className="fw-bold font-monospace" style={{ color: '#38bdf8', fontSize: '0.75rem' }}>PORT-104</span>
+                          <span className="badge font-monospace" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>Medium</span>
+                        </div>
+                        <div className="text-white small fw-medium mb-2">Automate PDF invoice audit export generation</div>
+                        <div className="d-flex justify-content-between align-items-center text-muted small font-monospace" style={{ fontSize: '0.75rem' }}>
+                          <span><i className="bi bi-calendar2 me-1"></i> Nov 18</span>
+                          <span className="badge rounded-circle p-1" style={{ background: '#3b82f6', color: '#fff', width: 22, height: 22 }}>SK</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Column 2: In Progress */}
+                  <div className="flex-fill" style={{ minWidth: '230px' }}>
+                    <div className="d-flex justify-content-between align-items-center mb-2 px-1">
+                      <span className="small fw-semibold font-monospace" style={{ color: '#38bdf8' }}>IN PROGRESS</span>
+                      <span className="badge rounded-pill font-monospace" style={{ background: '#2563eb', color: '#fff' }}>2</span>
+                    </div>
+                    <div className="d-flex flex-column gap-2">
+                      <div className="p-3 rounded-3" style={{ background: 'rgba(15, 23, 42, 0.95)', border: '1px solid rgba(59, 130, 246, 0.45)', borderLeft: '3px solid #3b82f6' }}>
+                        <div className="d-flex justify-content-between small mb-1">
+                          <span className="fw-bold font-monospace" style={{ color: '#38bdf8', fontSize: '0.75rem' }}>PORT-101</span>
+                          <span className="badge font-monospace" style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444' }}>High</span>
+                        </div>
+                        <div className="text-white small fw-medium mb-2">Implement OAuth2 Google authentication flow</div>
+                        <div className="d-flex justify-content-between align-items-center text-muted small font-monospace" style={{ fontSize: '0.75rem' }}>
+                          <span className="text-success"><i className="bi bi-check2-square me-1"></i> 3/4 subtasks</span>
+                          <span className="badge rounded-circle p-1" style={{ background: '#6366f1', color: '#fff', width: 22, height: 22 }}>AP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Column 3: Review */}
+                  <div className="flex-fill" style={{ minWidth: '230px' }}>
+                    <div className="d-flex justify-content-between align-items-center mb-2 px-1">
+                      <span className="small fw-semibold font-monospace" style={{ color: '#06b6d4' }}>REVIEW</span>
+                      <span className="badge rounded-pill font-monospace" style={{ background: 'rgba(6, 182, 212, 0.2)', color: '#22d3ee' }}>1</span>
+                    </div>
+                    <div className="d-flex flex-column gap-2">
+                      <div className="p-3 rounded-3" style={{ background: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(51, 65, 85, 0.7)' }}>
+                        <div className="d-flex justify-content-between small mb-1">
+                          <span className="fw-bold font-monospace" style={{ color: '#38bdf8', fontSize: '0.75rem' }}>PORT-103</span>
+                          <span className="badge font-monospace" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>Medium</span>
+                        </div>
+                        <div className="text-white small fw-medium mb-2">Design system tokens and responsive audit</div>
+                        <div className="d-flex justify-content-between align-items-center text-muted small font-monospace" style={{ fontSize: '0.75rem' }}>
+                          <span style={{ color: '#22d3ee' }}><i className="bi bi-git me-1"></i> PR #42</span>
+                          <span className="badge rounded-circle p-1" style={{ background: '#06b6d4', color: '#fff', width: 22, height: 22 }}>SR</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Column 4: Done */}
+                  <div className="flex-fill" style={{ minWidth: '230px' }}>
+                    <div className="d-flex justify-content-between align-items-center mb-2 px-1">
+                      <span className="small fw-semibold text-success font-monospace">DONE</span>
+                      <span className="badge rounded-pill font-monospace" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399' }}>3</span>
+                    </div>
+                    <div className="d-flex flex-column gap-2">
+                      <div className="p-3 rounded-3 opacity-75" style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(51, 65, 85, 0.5)' }}>
+                        <div className="d-flex justify-content-between small mb-1">
+                          <span className="fw-bold font-monospace text-muted" style={{ fontSize: '0.75rem' }}>PORT-100</span>
+                          <span className="badge font-monospace" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>Verified</span>
+                        </div>
+                        <div className="text-muted text-decoration-line-through small fw-medium mb-2">Database schema migration and B-Tree indexes</div>
+                        <div className="d-flex justify-content-between align-items-center text-muted small font-monospace" style={{ fontSize: '0.75rem' }}>
+                          <span className="text-success"><i className="bi bi-check-all me-1"></i> Merged</span>
+                          <span className="badge rounded-circle p-1" style={{ background: '#10b981', color: '#fff', width: 22, height: 22 }}>ML</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              </div>
+            )}
 
-                <div className="row g-3 mb-4">
+            {/* TAB CONTENT: EXECUTIVE COCKPIT */}
+            {activeTab === 'overview' && (
+              <div className="pt-2">
+                <div className="row g-3 mb-3">
                   <div className="col-6 col-md-3">
-                    <div className="tf-card p-3">
-                      <div className="text-muted small">Active Work Items</div>
-                      <div className="fs-3 fw-bold text-body">24</div>
+                    <div className="p-3 rounded-3" style={{ background: 'rgba(15, 23, 42, 0.85)', border: '1px solid rgba(51, 65, 85, 0.7)' }}>
+                      <div className="text-muted small font-monospace">Active Work Items</div>
+                      <div className="fs-3 fw-bold text-white font-monospace">24</div>
                       <span className="text-success small fw-medium">↑ 4 completed today</span>
                     </div>
                   </div>
                   <div className="col-6 col-md-3">
-                    <div className="tf-card p-3">
-                      <div className="text-muted small">In Progress</div>
-                      <div className="fs-3 fw-bold text-primary">8</div>
-                      <span className="text-muted small">Across 4 projects</span>
+                    <div className="p-3 rounded-3" style={{ background: 'rgba(15, 23, 42, 0.85)', border: '1px solid rgba(51, 65, 85, 0.7)' }}>
+                      <div className="text-muted small font-monospace">In Progress</div>
+                      <div className="fs-3 fw-bold font-monospace" style={{ color: '#38bdf8' }}>8</div>
+                      <span className="text-muted small font-monospace">Across 4 projects</span>
                     </div>
                   </div>
                   <div className="col-6 col-md-3">
-                    <div className="tf-card p-3">
-                      <div className="text-muted small">High Priority</div>
-                      <div className="fs-3 fw-bold text-warning">5</div>
-                      <span className="text-muted small">Under active triage</span>
+                    <div className="p-3 rounded-3" style={{ background: 'rgba(15, 23, 42, 0.85)', border: '1px solid rgba(51, 65, 85, 0.7)' }}>
+                      <div className="text-muted small font-monospace">High Priority</div>
+                      <div className="fs-3 fw-bold font-monospace" style={{ color: '#fbbf24' }}>5</div>
+                      <span className="text-muted small font-monospace">Under active triage</span>
                     </div>
                   </div>
                   <div className="col-6 col-md-3">
-                    <div className="tf-card p-3">
-                      <div className="text-muted small">Blocked Items</div>
-                      <div className="fs-3 fw-bold text-danger">1</div>
-                      <span className="text-danger small fw-medium">Waiting on AWS IAM</span>
+                    <div className="p-3 rounded-3" style={{ background: 'rgba(15, 23, 42, 0.85)', border: '1px solid rgba(51, 65, 85, 0.7)' }}>
+                      <div className="text-muted small font-monospace">Blocked Items</div>
+                      <div className="fs-3 fw-bold font-monospace text-danger">0</div>
+                      <span className="text-success small fw-medium font-monospace">All clear</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="tf-card p-3">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span className="fw-semibold text-body small">Active Delivery Streams</span>
-                    <span className="text-muted small">4 Projects</span>
+                <div className="p-3 rounded-3" style={{ background: 'rgba(15, 23, 42, 0.85)', border: '1px solid rgba(51, 65, 85, 0.7)' }}>
+                  <div className="d-flex justify-content-between align-items-center mb-2 font-monospace small">
+                    <span className="text-white fw-bold">Active Delivery Streams</span>
+                    <span className="text-muted">4 Initiatives</span>
                   </div>
-                  <div className="d-flex flex-column gap-2">
-                    <div>
-                      <div className="d-flex justify-content-between small mb-1">
-                        <span className="fw-medium text-body">Customer Portal v2 (PORT)</span>
-                        <span className="text-muted">75% Complete</span>
-                      </div>
-                      <div className="progress" style={{ height: '6px' }}>
-                        <div className="progress-bar bg-primary" style={{ width: '75%' }}></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="d-flex justify-content-between small mb-1">
-                        <span className="fw-medium text-body">Platform Reliability & Scaling (REL)</span>
-                        <span className="text-muted">83% Complete</span>
-                      </div>
-                      <div className="progress" style={{ height: '6px' }}>
-                        <div className="progress-bar bg-success" style={{ width: '83%' }}></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* VIEW 2: KANBAN BOARD */}
-            {activeTab === 'board' && (
-              <div>
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <div className="d-flex align-items-center gap-2">
-                    <span className="badge bg-primary text-white">Project: PORT</span>
-                    <h6 className="fw-bold mb-0 text-body">Customer Portal Board</h6>
-                  </div>
-                  <span className="text-muted small">Drag and drop cards between swimlanes</span>
-                </div>
-
-                <div className="d-flex gap-3 overflow-x-auto pb-2">
-                  {/* Todo Column */}
-                  <div className="flex-fill" style={{ minWidth: '220px' }}>
-                    <div className="d-flex justify-content-between align-items-center mb-2 px-1">
-                      <span className="small fw-bold text-muted text-uppercase">To Do</span>
-                      <span className="badge bg-secondary bg-opacity-10 text-muted rounded-pill">2</span>
-                    </div>
-                    <div className="d-flex flex-column gap-2">
-                      <div className="kanban-card">
-                        <div className="d-flex justify-content-between small text-muted mb-1">
-                          <span className="font-monospace fw-bold text-primary">PORT-104</span>
-                          <span className="badge bg-warning bg-opacity-10 text-warning">Medium</span>
-                        </div>
-                        <div className="fw-medium text-body small mb-2">Automate PDF invoice export generation</div>
-                        <div className="d-flex justify-content-between align-items-center text-muted small">
-                          <span><i className="bi bi-calendar2 me-1"></i> Nov 18</span>
-                          <div className="avatar-circle" style={{ width: 22, height: 22, fontSize: 10 }}>SK</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* In Progress Column */}
-                  <div className="flex-fill" style={{ minWidth: '220px' }}>
-                    <div className="d-flex justify-content-between align-items-center mb-2 px-1">
-                      <span className="small fw-bold text-primary text-uppercase">In Progress</span>
-                      <span className="badge bg-primary text-white rounded-pill">2</span>
-                    </div>
-                    <div className="d-flex flex-column gap-2">
-                      <div className="kanban-card" style={{ borderLeft: '3px solid var(--tf-primary)' }}>
-                        <div className="d-flex justify-content-between small text-muted mb-1">
-                          <span className="font-monospace fw-bold text-primary">PORT-101</span>
-                          <span className="badge bg-danger bg-opacity-10 text-danger">High</span>
-                        </div>
-                        <div className="fw-medium text-body small mb-2">Implement OAuth2 Google authentication flow</div>
-                        <div className="d-flex justify-content-between align-items-center text-muted small">
-                          <span><i className="bi bi-check2-square text-success me-1"></i> 3/4 subtasks</span>
-                          <div className="avatar-circle bg-primary" style={{ width: 22, height: 22, fontSize: 10 }}>AP</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Review Column */}
-                  <div className="flex-fill" style={{ minWidth: '220px' }}>
-                    <div className="d-flex justify-content-between align-items-center mb-2 px-1">
-                      <span className="small fw-bold text-info text-uppercase">Review</span>
-                      <span className="badge bg-info bg-opacity-10 text-info rounded-pill">1</span>
-                    </div>
-                    <div className="d-flex flex-column gap-2">
-                      <div className="kanban-card">
-                        <div className="d-flex justify-content-between small text-muted mb-1">
-                          <span className="font-monospace fw-bold text-primary">PORT-103</span>
-                          <span className="badge bg-warning bg-opacity-10 text-warning">Medium</span>
-                        </div>
-                        <div className="fw-medium text-body small mb-2">Design system tokens and responsive audit</div>
-                        <div className="d-flex justify-content-between align-items-center text-muted small">
-                          <span className="text-info"><i className="bi bi-chat-text me-1"></i> PR #42</span>
-                          <div className="avatar-circle bg-info" style={{ width: 22, height: 22, fontSize: 10 }}>SR</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Done Column */}
-                  <div className="flex-fill" style={{ minWidth: '220px' }}>
-                    <div className="d-flex justify-content-between align-items-center mb-2 px-1">
-                      <span className="small fw-bold text-success text-uppercase">Done</span>
-                      <span className="badge bg-success bg-opacity-10 text-success rounded-pill">3</span>
-                    </div>
-                    <div className="d-flex flex-column gap-2">
-                      <div className="kanban-card opacity-75">
-                        <div className="d-flex justify-content-between small text-muted mb-1">
-                          <span className="font-monospace fw-bold text-muted">PORT-100</span>
-                          <span className="badge bg-success bg-opacity-10 text-success">Verified</span>
-                        </div>
-                        <div className="fw-medium text-decoration-line-through text-muted small mb-2">Database schema migration and indexes</div>
-                        <div className="d-flex justify-content-between align-items-center text-muted small">
-                          <span className="text-success"><i className="bi bi-check-all me-1"></i> Merged</span>
-                          <div className="avatar-circle bg-success" style={{ width: 22, height: 22, fontSize: 10 }}>ML</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* VIEW 3: TIMELINE SCHEDULE */}
-            {activeTab === 'timeline' && (
-              <div>
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h6 className="fw-bold mb-0 text-body">Gantt Delivery Schedule • Q4 Roadmap</h6>
-                  <span className="text-muted small">Delivery Windows & Dependencies</span>
-                </div>
-
-                <div className="tf-card p-3">
                   <div className="d-flex flex-column gap-3">
                     <div>
-                      <div className="d-flex justify-content-between small mb-1">
-                        <span className="fw-semibold text-body">Customer Portal v2 — MVP Release</span>
+                      <div className="d-flex justify-content-between small mb-1 font-monospace">
+                        <span className="text-white">Customer Portal v2 (PORT)</span>
+                        <span className="text-muted">75% Complete</span>
+                      </div>
+                      <div className="progress" style={{ height: '7px', background: 'rgba(51, 65, 85, 0.6)' }}>
+                        <div className="progress-bar bg-primary" style={{ width: '75%', borderRadius: '4px' }}></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="d-flex justify-content-between small mb-1 font-monospace">
+                        <span className="text-white">Platform Reliability & Database Indexing (REL)</span>
+                        <span className="text-muted">83% Complete</span>
+                      </div>
+                      <div className="progress" style={{ height: '7px', background: 'rgba(51, 65, 85, 0.6)' }}>
+                        <div className="progress-bar bg-success" style={{ width: '83%', borderRadius: '4px' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB CONTENT: GANTT TIMELINE */}
+            {activeTab === 'timeline' && (
+              <div className="pt-2">
+                <div className="p-3 rounded-3" style={{ background: 'rgba(15, 23, 42, 0.85)', border: '1px solid rgba(51, 65, 85, 0.7)' }}>
+                  <div className="d-flex flex-column gap-3">
+                    <div>
+                      <div className="d-flex justify-content-between small mb-1 font-monospace">
+                        <span className="text-white fw-bold">Customer Portal v2 — Production Release</span>
                         <span className="text-muted">Oct 20 → Nov 15</span>
                       </div>
-                      <div className="position-relative" style={{ height: '24px', backgroundColor: 'var(--tf-bg-subtle)', borderRadius: '4px' }}>
+                      <div className="position-relative" style={{ height: '26px', backgroundColor: 'rgba(51, 65, 85, 0.4)', borderRadius: '6px' }}>
                         <div
-                          className="position-absolute top-0 bottom-0 bg-primary rounded d-flex align-items-center px-2 text-white small"
+                          className="position-absolute top-0 bottom-0 bg-primary rounded d-flex align-items-center px-2 text-white font-monospace small"
                           style={{ left: '10%', width: '65%' }}
                         >
                           <span className="text-truncate" style={{ fontSize: 11 }}>Active Development (75%)</span>
@@ -318,31 +366,16 @@ export default function LandingPage() {
                     </div>
 
                     <div>
-                      <div className="d-flex justify-content-between small mb-1">
-                        <span className="fw-semibold text-body">Platform Reliability & Database Indexing</span>
+                      <div className="d-flex justify-content-between small mb-1 font-monospace">
+                        <span className="text-white fw-bold">Platform Reliability & MySQL B-Tree Indexing</span>
                         <span className="text-muted">Oct 15 → Nov 05</span>
                       </div>
-                      <div className="position-relative" style={{ height: '24px', backgroundColor: 'var(--tf-bg-subtle)', borderRadius: '4px' }}>
+                      <div className="position-relative" style={{ height: '26px', backgroundColor: 'rgba(51, 65, 85, 0.4)', borderRadius: '6px' }}>
                         <div
-                          className="position-absolute top-0 bottom-0 bg-success rounded d-flex align-items-center px-2 text-white small"
+                          className="position-absolute top-0 bottom-0 bg-success rounded d-flex align-items-center px-2 text-white font-monospace small"
                           style={{ left: '5%', width: '80%' }}
                         >
-                          <span className="text-truncate" style={{ fontSize: 11 }}>Complete & Benchmarked (100%)</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="d-flex justify-content-between small mb-1">
-                        <span className="fw-semibold text-body">Security Hardening & RBAC Audit</span>
-                        <span className="text-muted">Nov 01 → Dec 10</span>
-                      </div>
-                      <div className="position-relative" style={{ height: '24px', backgroundColor: 'var(--tf-bg-subtle)', borderRadius: '4px' }}>
-                        <div
-                          className="position-absolute top-0 bottom-0 bg-warning rounded d-flex align-items-center px-2 text-dark small"
-                          style={{ left: '40%', width: '50%' }}
-                        >
-                          <span className="text-truncate" style={{ fontSize: 11 }}>In Planning & Staging</span>
+                          <span className="text-truncate" style={{ fontSize: 11 }}>Complete & Verified (100%)</span>
                         </div>
                       </div>
                     </div>
@@ -350,202 +383,343 @@ export default function LandingPage() {
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      </section>
 
-      {/* 3. TRUST & ARCHITECTURE STRIP */}
-      <section className="py-4 my-4 border-top border-bottom" style={{ borderColor: 'var(--tf-border)' }}>
-        <div className="container-xl text-center">
-          <div className="text-muted small text-uppercase tracking-wider fw-bold mb-3">
-            Engineered for Modern Software Teams
-          </div>
-          <div className="d-flex justify-content-center align-items-center gap-4 gap-md-5 flex-wrap">
-            <div className="d-flex align-items-center gap-2">
-              <i className="bi bi-layers-fill text-primary fs-5"></i>
-              <span className="fw-semibold text-body small">4-Tier Hierarchy</span>
-            </div>
-            <div className="d-flex align-items-center gap-2">
-              <i className="bi bi-lightning-charge-fill text-warning fs-5"></i>
-              <span className="fw-semibold text-body small">MySQL B-Tree (0.07ms)</span>
-            </div>
-            <div className="d-flex align-items-center gap-2">
-              <i className="bi bi-shield-lock-fill text-success fs-5"></i>
-              <span className="fw-semibold text-body small">Policy-Enforced RBAC</span>
-            </div>
-            <div className="d-flex align-items-center gap-2">
-              <i className="bi bi-stars text-info fs-5"></i>
-              <span className="fw-semibold text-body small">Grounded AI Guardrails</span>
-            </div>
-            <div className="d-flex align-items-center gap-2">
-              <i className="bi bi-file-earmark-code-fill text-primary fs-5"></i>
-              <span className="fw-semibold text-body small">RESTful JSON API</span>
+            {/* Floating Assurance Badge */}
+            <div className="mt-4 pt-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2" style={{ borderColor: 'rgba(51, 65, 85, 0.6)' }}>
+              <div className="d-flex align-items-center gap-2 font-monospace small text-muted" style={{ fontSize: '0.75rem' }}>
+                <i className="bi bi-cpu text-primary"></i>
+                <span>Deterministic REST Dispatch • Zero LLM Hallucinations on State</span>
+              </div>
+              <div
+                className="px-2 py-1 rounded font-monospace small d-inline-flex align-items-center gap-2"
+                style={{
+                  background: 'rgba(15, 23, 42, 0.9)',
+                  border: '1px solid rgba(59, 130, 246, 0.3)',
+                  color: '#93c5fd',
+                  fontSize: '0.75rem',
+                }}
+              >
+                <i className="bi bi-lock-fill text-primary"></i>
+                <span>Deterministic MySQL B-Tree • Zero Sync Drift</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4. PROBLEM → SOLUTION STORYTELLING */}
-      <section className="py-5">
+      {/* ── 3. ENTERPRISE SECTOR TICKER (POCHYAA PARADIGM) ── */}
+      <section className="py-4 my-5 text-center">
+        <div className="text-uppercase font-mono small fw-bold tracking-wider mb-4" style={{ fontSize: '0.75rem', color: 'var(--tf-text-muted)', letterSpacing: '0.08em' }}>
+          ENGINEERED FOR HIGH-VELOCITY ENGINEERING & PRODUCT TEAMS ACROSS SECTORS
+        </div>
+        <div className="d-flex justify-content-center align-items-center gap-3 gap-md-4 flex-wrap font-monospace text-muted small">
+          <div className="sector-ticker-chip">
+            <i className="bi bi-wallet2 text-primary"></i>
+            <span className="text-slate-300">FinTech & Core Banking</span>
+          </div>
+          <div className="sector-ticker-chip">
+            <i className="bi bi-cloud-check text-info"></i>
+            <span className="text-slate-300">Distributed Cloud SaaS</span>
+          </div>
+          <div className="sector-ticker-chip">
+            <i className="bi bi-heart-pulse text-danger"></i>
+            <span className="text-slate-300">Healthcare Systems</span>
+          </div>
+          <div className="sector-ticker-chip">
+            <i className="bi bi-cart3 text-warning"></i>
+            <span className="text-slate-300">High-Volume E-Commerce</span>
+          </div>
+          <div className="sector-ticker-chip">
+            <i className="bi bi-truck text-success"></i>
+            <span className="text-slate-300">Logistics & Infrastructure</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 4. PARADIGMS OF ASSURANCE (POCHYAA COMPARISON SECTION) ── */}
+      <section className="py-5 my-4">
         <div className="text-center mb-5">
-          <h2 className="fw-bold tracking-tight text-body">Work is fragmented. TaskFlow brings clarity.</h2>
-          <p className="text-muted mx-auto" style={{ maxWidth: '600px' }}>
-            When projects rely on scattered spreadsheets and disconnected Slack threads, delivery dates slip and ownership dissolves.
+          <div className="font-monospace text-uppercase fw-bold text-primary small mb-2" style={{ letterSpacing: '0.08em', fontSize: '0.78rem' }}>
+            PARADIGMS OF WORK ASSURANCE
+          </div>
+          <h2 className="fw-extrabold text-body tracking-tight" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
+            Why Disconnected Task Trackers Are Costing Your Team Weeks
+          </h2>
+          <p className="text-secondary mx-auto mt-3" style={{ maxWidth: '680px', fontSize: '1.05rem', lineHeight: 1.6 }}>
+            Traditional disconnected tools leave tasks buried in chat threads and static spreadsheets. By release week, context has dissolved, blockers are caught late, and triage turns adversarial.
           </p>
         </div>
 
-        <div className="row g-4 mx-auto" style={{ maxWidth: '960px' }}>
+        <div className="row g-4 mx-auto" style={{ maxWidth: '1080px' }}>
+          {/* Problem Card (The Drift Bucket) */}
           <div className="col-12 col-md-6">
-            <div className="story-compare-box story-box-problem">
-              <div className="d-flex align-items-center gap-2 mb-3">
-                <i className="bi bi-x-circle-fill text-danger fs-5"></i>
-                <h5 className="fw-bold text-danger mb-0">The Fragmented Workflow</h5>
-              </div>
-              <ul className="list-unstyled d-flex flex-column gap-3 text-muted small mb-0">
-                <li className="d-flex align-items-start gap-2">
-                  <i className="bi bi-dash text-danger mt-1"></i>
-                  <span>Updates live in 10 different Slack channels where context gets buried.</span>
-                </li>
-                <li className="d-flex align-items-start gap-2">
-                  <i className="bi bi-dash text-danger mt-1"></i>
-                  <span>Tasks live in spreadsheets with broken formulas and stale deadlines.</span>
-                </li>
-                <li className="d-flex align-items-start gap-2">
-                  <i className="bi bi-dash text-danger mt-1"></i>
-                  <span>Blocked deliverables are discovered on release day instead of sprint planning.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="col-12 col-md-6">
-            <div className="story-compare-box story-box-solution">
-              <div className="d-flex align-items-center gap-2 mb-3">
-                <i className="bi bi-check-circle-fill text-success fs-5"></i>
-                <h5 className="fw-bold text-success mb-0">The TaskFlow Experience</h5>
-              </div>
-              <ul className="list-unstyled d-flex flex-column gap-3 text-body small mb-0">
-                <li className="d-flex align-items-start gap-2">
-                  <i className="bi bi-check-lg text-success mt-1"></i>
-                  <span>One connected workspace mapping projects, milestones, tasks, and subtasks.</span>
-                </li>
-                <li className="d-flex align-items-start gap-2">
-                  <i className="bi bi-check-lg text-success mt-1"></i>
-                  <span>Explicit ownership, start dates, and visual blocker alerts with reasons.</span>
-                </li>
-                <li className="d-flex align-items-start gap-2">
-                  <i className="bi bi-check-lg text-success mt-1"></i>
-                  <span>Audited activity trail and instant multi-view switcher (Table, Board, Calendar, Timeline).</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. 5-TIER WORK MANAGEMENT DOMAIN HIERARCHY */}
-      <section className="py-5 my-3">
-        <div className="text-center mb-4">
-          <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1 mb-2">
-            Structured Domain Model
-          </span>
-          <h2 className="fw-bold tracking-tight text-body">Built to model real engineering delivery</h2>
-          <p className="text-muted mx-auto" style={{ maxWidth: '640px' }}>
-            Not just a flat todo checklist. TaskFlow models how high-performing teams organize and execute complex technical initiatives.
-          </p>
-        </div>
-
-        <div className="hierarchy-flow-container mx-auto" style={{ maxWidth: '1000px' }}>
-          <div className="hierarchy-node">
-            <div className="text-muted small text-uppercase fw-bold mb-1">01. Organization</div>
-            <div className="fw-bold text-body">Northstar Labs</div>
-            <span className="text-muted small">Tenant boundary</span>
-          </div>
-
-          <i className="bi bi-arrow-right hierarchy-arrow"></i>
-
-          <div className="hierarchy-node">
-            <div className="text-muted small text-uppercase fw-bold mb-1">02. Workspace</div>
-            <div className="fw-bold text-primary">Engineering</div>
-            <span className="text-muted small">Collaborative space</span>
-          </div>
-
-          <i className="bi bi-arrow-right hierarchy-arrow"></i>
-
-          <div className="hierarchy-node">
-            <div className="text-muted small text-uppercase fw-bold mb-1">03. Project</div>
-            <div className="fw-bold text-body">Customer Portal</div>
-            <span className="text-muted small">Key: PORT</span>
-          </div>
-
-          <i className="bi bi-arrow-right hierarchy-arrow"></i>
-
-          <div className="hierarchy-node">
-            <div className="text-muted small text-uppercase fw-bold mb-1">04. Work Item</div>
-            <div className="fw-bold text-body">PORT-101</div>
-            <span className="text-muted small">OAuth Integration</span>
-          </div>
-
-          <i className="bi bi-arrow-right hierarchy-arrow"></i>
-
-          <div className="hierarchy-node">
-            <div className="text-muted small text-uppercase fw-bold mb-1">05. Subtasks & Trail</div>
-            <div className="fw-bold text-success">Checklist + Logs</div>
-            <span className="text-muted small">Verified progress</span>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. GROUNDED AI SECTION */}
-      <section className="py-5 my-3">
-        <div className="ai-grounded-frame mx-auto" style={{ maxWidth: '1000px' }}>
-          <div className="row align-items-center g-4">
-            <div className="col-12 col-lg-6">
-              <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1 mb-2">
-                <i className="bi bi-stars me-1"></i> Grounded AI Assistant
-              </span>
-              <h3 className="fw-bold text-body mb-3">AI suggests. Your team decides.</h3>
-              <p className="text-muted mb-4" style={{ lineHeight: 1.6 }}>
-                TaskFlow’s AI assistant accelerates daily work without taking unpredictable control. Convert natural language into structured work items, decompose complex tasks into actionable checklists, and polish acceptance criteria—always with human preview and confirmation before anything writes to the database.
-              </p>
-              <div className="d-flex flex-column gap-2 small text-muted">
-                <div><i className="bi bi-shield-check text-success me-2"></i> Never executes blind database mutations</div>
-                <div><i className="bi bi-shield-check text-success me-2"></i> Deterministic heuristic engine fallback if AI service times out</div>
-                <div><i className="bi bi-shield-check text-success me-2"></i> No sensitive credentials or secrets transmitted</div>
-              </div>
-            </div>
-
-            <div className="col-12 col-lg-6">
-              <div className="tf-card p-3 border shadow-sm">
-                <div className="d-flex align-items-center gap-2 pb-2 mb-2 border-bottom">
-                  <i className="bi bi-chat-left-quote text-primary"></i>
-                  <span className="small text-muted">Natural Language Prompt</span>
+            <div className="compare-bucket-problem">
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <div className="d-flex align-items-center gap-2">
+                  <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: 32, height: 32, background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444' }}>
+                    <i className="bi bi-x-lg"></i>
+                  </div>
+                  <h5 className="fw-bold text-body mb-0">Legacy Disconnected Tooling</h5>
                 </div>
-                <div className="p-2 rounded bg-subtle small font-monospace mb-3 text-body">
+                <span className="badge font-monospace" style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', fontSize: '10px' }}>
+                  THE DRIFT BUCKET
+                </span>
+              </div>
+
+              <ul className="list-unstyled d-flex flex-column gap-3 mb-0 small">
+                <li className="d-flex align-items-start gap-2">
+                  <i className="bi bi-x-circle text-danger mt-1"></i>
+                  <div>
+                    <strong className="text-body fw-bold">Delayed Discovery:</strong> Blockers surface on release eve instead of sprint day one when they could be resolved.
+                  </div>
+                </li>
+                <li className="d-flex align-items-start gap-2">
+                  <i className="bi bi-x-circle text-danger mt-1"></i>
+                  <div>
+                    <strong className="text-body fw-bold">Lost Architectural Context:</strong> Critical design decisions vanish into 10 disconnected Slack threads.
+                  </div>
+                </li>
+                <li className="d-flex align-items-start gap-2">
+                  <i className="bi bi-x-circle text-danger mt-1"></i>
+                  <div>
+                    <strong className="text-body fw-bold">Phantom Dependencies:</strong> Upstream blockers remain untracked until pull request reviews stall out.
+                  </div>
+                </li>
+                <li className="d-flex align-items-start gap-2">
+                  <i className="bi bi-x-circle text-danger mt-1"></i>
+                  <div>
+                    <strong className="text-body fw-bold">Zero Audit Trail:</strong> No deterministic log of who changed status, estimate, milestone, or assignee.
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Solution Card (TaskFlow Pre-Emptive Gate) */}
+          <div className="col-12 col-md-6">
+            <div className="compare-bucket-solution">
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <div className="d-flex align-items-center gap-2">
+                  <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: 32, height: 32, background: '#2563eb', color: '#ffffff' }}>
+                    <i className="bi bi-check-lg"></i>
+                  </div>
+                  <h5 className="fw-bold text-body mb-0">TaskFlow Unified Work Engine</h5>
+                </div>
+                <span className="badge font-monospace" style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#2563eb', border: '1px solid rgba(59, 130, 246, 0.4)', fontSize: '10px' }}>
+                  ZERO DRIFT
+                </span>
+              </div>
+
+              <ul className="list-unstyled d-flex flex-column gap-3 mb-0 small">
+                <li className="d-flex align-items-start gap-2">
+                  <i className="bi bi-check2-circle text-success mt-1"></i>
+                  <div>
+                    <strong className="text-body fw-bold">Zero-Second Lag:</strong> Real-time Kanban sync and instantaneous state transitions via REST and optimistic UI.
+                  </div>
+                </li>
+                <li className="d-flex align-items-start gap-2">
+                  <i className="bi bi-check2-circle text-success mt-1"></i>
+                  <div>
+                    <strong className="text-body fw-bold">Explicit Blocker Escalation:</strong> Mandatory reason flag prevents stealth delays and highlights risks across swimlanes.
+                  </div>
+                </li>
+                <li className="d-flex align-items-start gap-2">
+                  <i className="bi bi-check2-circle text-success mt-1"></i>
+                  <div>
+                    <strong className="text-body fw-bold">Deterministic Subtask Checklists:</strong> Itemized execution state with verified progress counts per work item.
+                  </div>
+                </li>
+                <li className="d-flex align-items-start gap-2">
+                  <i className="bi bi-check2-circle text-success mt-1"></i>
+                  <div>
+                    <strong className="text-body fw-bold">Append-Only Forensic Audit Trail:</strong> Cryptographic-style event log records every status, user, and priority modification.
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 5. THREE-TIER ARCHITECTURAL FEATURE PILLARS (POCHYAA RULE TIERS) ── */}
+      <section className="py-5 my-4">
+        <div className="text-center mb-5">
+          <div className="font-monospace text-uppercase fw-bold text-primary small mb-2" style={{ letterSpacing: '0.08em', fontSize: '0.78rem' }}>
+            THREE-TIER WORKSPACE ARCHITECTURE
+          </div>
+          <h2 className="fw-extrabold text-body tracking-tight" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
+            Engineered For Deterministic Delivery
+          </h2>
+          <p className="text-secondary mx-auto mt-2" style={{ maxWidth: '640px' }}>
+            Every work item flows through three rigorous layers of planning, execution, and forensic governance.
+          </p>
+        </div>
+
+        <div className="row g-4 mx-auto" style={{ maxWidth: '1120px' }}>
+          {/* Tier 1 */}
+          <div className="col-12 col-md-4">
+            <div className="pochyaa-card p-4 h-100 d-flex flex-column justify-content-between">
+              <div>
+                <div className="d-flex align-items-center justify-content-between mb-3">
+                  <div className="rounded-3 p-2 d-inline-flex" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' }}>
+                    <i className="bi bi-kanban fs-5"></i>
+                  </div>
+                  <span className="font-monospace small text-primary fw-bold">TIER 1 • L1 PLANNING</span>
+                </div>
+                <h5 className="fw-bold text-body mb-2">Roadmaps & Delivery Windows</h5>
+                <p className="text-muted small mb-4" style={{ lineHeight: 1.6 }}>
+                  Organize complex engineering initiatives into high-level milestones and visual Gantt-style timeline schedules. View delivery dependencies before release week.
+                </p>
+
+                <div className="d-flex flex-column gap-2 font-monospace small">
+                  <div className="tier-rule-row">
+                    <span className="text-slate-300">PL-101 Milestone Delivery Windows</span>
+                    <span className="badge bg-danger bg-opacity-10 text-danger" style={{ fontSize: '10px' }}>Critical</span>
+                  </div>
+                  <div className="tier-rule-row">
+                    <span className="text-slate-300">PL-102 Multi-Project Portfolios</span>
+                    <span className="badge bg-warning bg-opacity-10 text-warning" style={{ fontSize: '10px' }}>High</span>
+                  </div>
+                  <div className="tier-rule-row">
+                    <span className="text-slate-300">PL-104 Health Scoring (0-100%)</span>
+                    <span className="badge bg-success bg-opacity-10 text-success" style={{ fontSize: '10px' }}>Enforced</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-top text-muted small font-monospace" style={{ fontSize: '0.75rem' }}>
+                Automated milestone progress and due date boundaries
+              </div>
+            </div>
+          </div>
+
+          {/* Tier 2 */}
+          <div className="col-12 col-md-4">
+            <div className="pochyaa-card p-4 h-100 d-flex flex-column justify-content-between">
+              <div>
+                <div className="d-flex align-items-center justify-content-between mb-3">
+                  <div className="rounded-3 p-2 d-inline-flex" style={{ background: 'rgba(6, 182, 212, 0.15)', color: '#06b6d4' }}>
+                    <i className="bi bi-layout-three-columns fs-5"></i>
+                  </div>
+                  <span className="font-monospace small fw-bold" style={{ color: '#0891b2' }}>TIER 2 • L2 EXECUTION</span>
+                </div>
+                <h5 className="fw-bold text-body mb-2">Fluid Kanban & Multi-Views</h5>
+                <p className="text-muted small mb-4" style={{ lineHeight: 1.6 }}>
+                  Whether you prefer dense, spreadsheet-style tables or visual drag-and-drop Kanban swimlanes, status updates persist instantly with optimistic UI rollback.
+                </p>
+
+                <div className="d-flex flex-column gap-2 font-monospace small">
+                  <div className="tier-rule-row">
+                    <span className="text-slate-300">EX-201 5 Kanban Status Swimlanes</span>
+                    <span className="badge bg-primary bg-opacity-10 text-primary" style={{ fontSize: '10px' }}>Active</span>
+                  </div>
+                  <div className="tier-rule-row">
+                    <span className="text-slate-300">EX-202 Checklist Subtask Tally</span>
+                    <span className="badge bg-success bg-opacity-10 text-success" style={{ fontSize: '10px' }}>Verified</span>
+                  </div>
+                  <div className="tier-rule-row">
+                    <span className="text-slate-300">EX-204 Blocker Reason Sentinel</span>
+                    <span className="badge bg-danger bg-opacity-10 text-danger" style={{ fontSize: '10px' }}>High</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-top text-muted small font-monospace" style={{ fontSize: '0.75rem' }}>
+                Sub-0.09ms MySQL B-Tree indexing on status & priority
+              </div>
+            </div>
+          </div>
+
+          {/* Tier 3 */}
+          <div className="col-12 col-md-4">
+            <div className="pochyaa-card p-4 h-100 d-flex flex-column justify-content-between">
+              <div>
+                <div className="d-flex align-items-center justify-content-between mb-3">
+                  <div className="rounded-3 p-2 d-inline-flex" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                    <i className="bi bi-shield-check fs-5"></i>
+                  </div>
+                  <span className="font-monospace small text-success fw-bold">TIER 3 • L3 GOVERNANCE</span>
+                </div>
+                <h5 className="fw-bold text-body mb-2">Forensic Audit & RBAC</h5>
+                <p className="text-muted small mb-4" style={{ lineHeight: 1.6 }}>
+                  Strict server-side policy enforcement prevents unauthorized mutations. An append-only audit trail captures every action for full enterprise compliance.
+                </p>
+
+                <div className="d-flex flex-column gap-2 font-monospace small">
+                  <div className="tier-rule-row">
+                    <span className="text-slate-300">GV-301 Role-Based Access (Admin/Member)</span>
+                    <span className="badge bg-success bg-opacity-10 text-success" style={{ fontSize: '10px' }}>Enforced</span>
+                  </div>
+                  <div className="tier-rule-row">
+                    <span className="text-slate-300">GV-302 Append-Only Audit Trail</span>
+                    <span className="badge bg-primary bg-opacity-10 text-primary" style={{ fontSize: '10px' }}>Immutable</span>
+                  </div>
+                  <div className="tier-rule-row">
+                    <span className="text-slate-300">GV-303 Grounded AI Task Decomposition</span>
+                    <span className="badge bg-info bg-opacity-10 text-info" style={{ fontSize: '10px' }}>Grounded</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-top text-muted small font-monospace" style={{ fontSize: '0.75rem' }}>
+                Full security perimeter with CSRF, CORS & IDOR policies
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 6. GROUNDED AI ASSISTANT SHOWCASE ── */}
+      <section className="py-5 my-4">
+        <div className="pochyaa-card p-4 p-md-5 mx-auto" style={{ maxWidth: '1080px' }}>
+          <div className="row g-5 align-items-center">
+            <div className="col-12 col-lg-6">
+              <div className="d-flex align-items-center gap-2 mb-2 font-monospace text-primary small fw-semibold">
+                <i className="bi bi-stars"></i>
+                <span>GROUNDED AI ACCELERATOR</span>
+              </div>
+              <h3 className="fw-bold text-body mb-3">AI assistance that never hallucinates state.</h3>
+              <p className="text-secondary mb-4" style={{ lineHeight: 1.65 }}>
+                TaskFlow’s AI assistant accelerates daily work without taking unpredictable control. Convert natural language into structured work items, decompose complex initiatives into actionable checklists, and polish acceptance criteria—always with human preview and confirmation before anything writes to the database.
+              </p>
+              <div className="d-flex flex-column gap-2 small text-secondary font-monospace">
+                <div><i className="bi bi-check2 text-success me-2"></i> Never executes blind database mutations</div>
+                <div><i className="bi bi-check2 text-success me-2"></i> Deterministic heuristic engine fallback if AI service times out</div>
+                <div><i className="bi bi-check2 text-success me-2"></i> Strict tenant isolation with zero data leakage</div>
+              </div>
+            </div>
+
+            <div className="col-12 col-lg-6">
+              <div className="ai-console-pane">
+                <div className="d-flex align-items-center gap-2 pb-2 mb-2 border-bottom font-monospace small text-muted">
+                  <i className="bi bi-terminal text-primary"></i>
+                  <span>Natural Language Prompt</span>
+                </div>
+                <div className="ai-inner-box mb-3">
                   "Deploy Nginx security patches by Friday, high priority, assign to Daniel"
                 </div>
 
                 <div className="d-flex align-items-center justify-content-between mb-2">
-                  <span className="small fw-bold text-success"><i className="bi bi-magic me-1"></i> AI Structured Draft Preview</span>
-                  <span className="badge bg-success bg-opacity-10 text-success">Confidence: 94%</span>
+                  <span className="small fw-bold text-success font-monospace"><i className="bi bi-magic me-1"></i> AI Structured Draft Preview</span>
+                  <span className="badge font-monospace" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>Confidence: 94%</span>
                 </div>
 
-                <div className="border rounded p-2 small bg-surface">
-                  <div className="d-flex justify-content-between mb-1">
+                <div className="ai-inner-box">
+                  <div className="d-flex justify-content-between mb-2">
                     <span className="text-muted">Title:</span>
-                    <span className="fw-bold text-body">Deploy Nginx security patches</span>
+                    <span className="text-body fw-bold">Deploy Nginx security patches</span>
                   </div>
-                  <div className="d-flex justify-content-between mb-1">
+                  <div className="d-flex justify-content-between mb-2">
                     <span className="text-muted">Priority:</span>
-                    <span className="badge bg-danger bg-opacity-10 text-danger">High</span>
+                    <span className="badge bg-danger bg-opacity-20 text-danger">High</span>
                   </div>
-                  <div className="d-flex justify-content-between mb-1">
+                  <div className="d-flex justify-content-between mb-2">
                     <span className="text-muted">Due Date:</span>
-                    <span className="text-body fw-medium">Friday (End of sprint)</span>
+                    <span className="text-body">Friday (End of sprint)</span>
                   </div>
                   <div className="d-flex justify-content-between">
                     <span className="text-muted">Assignee:</span>
-                    <span className="text-body fw-medium">Daniel Kim (DevOps Lead)</span>
+                    <span className="text-body">Daniel Kim (DevOps Lead)</span>
                   </div>
                 </div>
 
@@ -559,35 +733,43 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 7. RECRUITER & INTERVIEWER 1-CLICK PERSONA LAUNCHER */}
+      {/* ── 7. ONE-CLICK PERSONA LAUNCHER (INTERVIEW READY) ── */}
       <section className="my-5">
-        <div className="tf-card p-4 mx-auto border shadow-sm" style={{ maxWidth: '900px' }}>
-          <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <div className="pochyaa-card p-4 p-md-5 mx-auto" style={{ maxWidth: '980px' }}>
+          <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
             <div>
-              <h5 className="fw-bold text-body mb-0">
+              <h4 className="fw-bold text-body mb-1">
                 <i className="bi bi-box-arrow-in-right text-primary me-2"></i> Instant Persona Exploration
-              </h5>
-              <span className="text-muted small">Select a realistic role in Northstar Engineering to explore the live application:</span>
+              </h4>
+              <span className="text-secondary small">Select a realistic role in Northstar Engineering to explore the live application:</span>
             </div>
-            <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">
+            <span
+              className="badge font-monospace"
+              style={{
+                background: 'rgba(59, 130, 246, 0.15)',
+                color: '#2563eb',
+                border: '1px solid rgba(59, 130, 246, 0.35)',
+                padding: '0.4rem 0.8rem',
+              }}
+            >
               One-Click Demo Access
             </span>
           </div>
 
           <div className="row g-3">
             <div className="col-12 col-md-4">
-              <div className="p-3 border rounded h-100 d-flex flex-column justify-content-between" style={{ backgroundColor: 'var(--tf-bg-subtle)' }}>
+              <div className="persona-card-item">
                 <div>
                   <div className="d-flex justify-content-between align-items-center mb-1">
                     <span className="fw-bold text-body">Maya Lin</span>
-                    <span className="badge bg-danger bg-opacity-10 text-danger">Admin</span>
+                    <span className="badge bg-danger bg-opacity-20 text-danger font-monospace">Admin</span>
                   </div>
-                  <div className="small text-muted mb-3">
+                  <div className="small text-muted mb-3" style={{ lineHeight: 1.5 }}>
                     Workspace Administrator with access to user roster, immutable audit logs, and live system diagnostics.
                   </div>
                 </div>
                 <button
-                  className="btn btn-outline-primary btn-sm w-100 fw-medium"
+                  className="btn btn-outline-primary btn-sm w-100 fw-medium font-monospace"
                   onClick={() => handleQuickLogin('admin@taskflow.dev', 'Password123!', 'Workspace Administrator')}
                   disabled={loginLoading}
                 >
@@ -597,18 +779,18 @@ export default function LandingPage() {
             </div>
 
             <div className="col-12 col-md-4">
-              <div className="p-3 border rounded h-100 d-flex flex-column justify-content-between" style={{ backgroundColor: 'var(--tf-bg-subtle)' }}>
+              <div className="persona-card-item">
                 <div>
                   <div className="d-flex justify-content-between align-items-center mb-1">
                     <span className="fw-bold text-body">Arjun Patel</span>
-                    <span className="badge bg-primary bg-opacity-10 text-primary">Lead Engineer</span>
+                    <span className="badge bg-primary bg-opacity-20 text-primary font-monospace">Lead Engineer</span>
                   </div>
-                  <div className="small text-muted mb-3">
+                  <div className="small text-muted mb-3" style={{ lineHeight: 1.5 }}>
                     Engineering lead managing Customer Portal (PORT) and Platform Reliability (REL) tasks and subtasks.
                   </div>
                 </div>
                 <button
-                  className="btn btn-primary btn-sm w-100 fw-medium"
+                  className="btn btn-primary btn-sm w-100 fw-medium font-monospace"
                   onClick={() => handleQuickLogin('demo@taskflow.dev', 'Password123!', 'Lead Engineer')}
                   disabled={loginLoading}
                 >
@@ -618,18 +800,18 @@ export default function LandingPage() {
             </div>
 
             <div className="col-12 col-md-4">
-              <div className="p-3 border rounded h-100 d-flex flex-column justify-content-between" style={{ backgroundColor: 'var(--tf-bg-subtle)' }}>
+              <div className="persona-card-item">
                 <div>
                   <div className="d-flex justify-content-between align-items-center mb-1">
                     <span className="fw-bold text-body">Sofia Rossi</span>
-                    <span className="badge bg-info bg-opacity-10 text-info">Designer</span>
+                    <span className="badge bg-info bg-opacity-20 text-info font-monospace">Designer</span>
                   </div>
-                  <div className="small text-muted mb-3">
+                  <div className="small text-muted mb-3" style={{ lineHeight: 1.5 }}>
                     Staff product designer demonstrating strict tenant isolation and server-side IDOR policy enforcement.
                   </div>
                 </div>
                 <button
-                  className="btn btn-outline-primary btn-sm w-100 fw-medium"
+                  className="btn btn-outline-primary btn-sm w-100 fw-medium font-monospace"
                   onClick={() => handleQuickLogin('sarah@taskflow.dev', 'Password123!', 'Staff Designer')}
                   disabled={loginLoading}
                 >
@@ -641,18 +823,26 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 8. FINAL CALL TO ACTION */}
-      <section className="text-center py-5 my-4 border-top" style={{ borderColor: 'var(--tf-border)' }}>
-        <h2 className="fw-bold text-body mb-2 tracking-tight">Make work visible. Make progress predictable.</h2>
-        <p className="text-muted mx-auto mb-4" style={{ maxWidth: '520px' }}>
+      {/* ── 8. BOTTOM CALL TO ACTION (POCHYAA PARADIGM) ── */}
+      <section className="text-center py-5 my-5 border-top">
+        <h2 className="fw-extrabold text-body mb-2 tracking-tight" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
+          Make work visible. Make progress predictable.
+        </h2>
+        <p className="text-secondary mx-auto mb-4" style={{ maxWidth: '580px', fontSize: '1.05rem', lineHeight: 1.6 }}>
           Explore TaskFlow’s multi-view engine, grounded AI, and role-based workspace today.
         </p>
         <div className="d-flex justify-content-center gap-3 flex-wrap">
-          <Link to="/login" className="btn btn-primary btn-lg px-4 fw-semibold shadow-sm">
-            Launch Live Demo <i className="bi bi-arrow-right ms-1"></i>
-          </Link>
-          <a href="/openapi.yaml" target="_blank" rel="noreferrer" className="btn btn-outline-secondary btn-lg px-4 fw-medium">
-            <i className="bi bi-file-earmark-code me-2"></i> View OpenAPI Spec
+          <button
+            className="btn-pochyaa-primary"
+            onClick={() => handleQuickLogin('demo@taskflow.dev', 'Password123!', 'Lead Engineer')}
+            disabled={loginLoading}
+          >
+            <span>{loginLoading ? 'Entering...' : 'Launch Interactive Demo'}</span>
+            <i className="bi bi-arrow-right ms-1"></i>
+          </button>
+          <a href="/openapi.yaml" target="_blank" rel="noreferrer" className="btn-pochyaa-secondary">
+            <i className="bi bi-file-earmark-code text-primary me-2"></i>
+            <span>View OpenAPI Spec</span>
           </a>
         </div>
       </section>

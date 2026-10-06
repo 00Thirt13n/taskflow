@@ -115,7 +115,7 @@ export default function ProjectsPage() {
                       <div className="fw-bold text-truncate" style={{ maxWidth: '170px' }}>
                         {proj.name}
                       </div>
-                      <span className="badge bg-secondary font-monospace" style={{ fontSize: '0.68rem' }}>
+                      <span className="badge bg-secondary fw-semibold" style={{ fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums' }}>
                         {proj.key}
                       </span>
                     </div>

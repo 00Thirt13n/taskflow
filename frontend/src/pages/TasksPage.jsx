@@ -56,6 +56,11 @@ export default function TasksPage() {
       .catch((err) => console.error('Failed to load projects:', err));
   }, []);
 
+  // Reset pagination to page 1 whenever active filter or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, statusFilter, priorityFilter, projectFilter, quickPreset]);
+
   // Fetch tasks
   const fetchTasks = useCallback(async () => {
     setLoading(true);
@@ -243,7 +248,7 @@ export default function TasksPage() {
       </div>
 
       {/* Filter and Presets Bar */}
-      <div className="tf-card mb-4 p-3">
+      <div className="tf-card mb-3 p-3">
         <div className="row g-2 align-items-center">
           {/* Search box */}
           <div className="col-12 col-md-3">
@@ -401,11 +406,11 @@ export default function TasksPage() {
                       />
                     </th>
                     <th style={{ width: '90px' }}>Key</th>
-                    <th>Title & Project</th>
+                    <th>Title & project</th>
                     <th style={{ width: '120px' }}>Status</th>
                     <th style={{ width: '100px' }}>Priority</th>
                     <th style={{ width: '130px' }}>Assignee</th>
-                    <th style={{ width: '120px' }}>Due Date</th>
+                    <th style={{ width: '120px' }}>Due date</th>
                     <th style={{ width: '80px' }} className="text-end">Actions</th>
                   </tr>
                 </thead>
@@ -428,7 +433,7 @@ export default function TasksPage() {
                           />
                         </td>
                         <td>
-                          <span className="badge bg-secondary font-monospace" style={{ fontSize: '0.75rem' }}>
+                          <span className="badge bg-secondary fw-semibold" style={{ fontSize: '0.75rem', fontVariantNumeric: 'tabular-nums' }}>
                             {task.task_key || `TASK-${task.id}`}
                           </span>
                         </td>
@@ -439,7 +444,7 @@ export default function TasksPage() {
                             </span>
                             {task.is_blocked && (
                               <span className="badge bg-danger-subtle text-danger" style={{ fontSize: '0.65rem' }}>
-                                <i className="bi bi-flag-fill me-1"></i>BLOCKED
+                                <i className="bi bi-flag-fill me-1"></i>Blocked
                               </span>
                             )}
                           </div>
@@ -518,9 +523,9 @@ export default function TasksPage() {
                 {/* Column Header */}
                 <div className="kanban-column-header">
                   <div className="d-flex align-items-center gap-2">
-                    <span className="text-uppercase" style={{ letterSpacing: '0.04em' }}>
-                      {columnStatus === 'todo' && 'To Do'}
-                      {columnStatus === 'in-progress' && 'In Progress'}
+                    <span className="fw-semibold text-body" style={{ fontSize: '0.8125rem' }}>
+                      {columnStatus === 'todo' && 'To do'}
+                      {columnStatus === 'in-progress' && 'In progress'}
                       {columnStatus === 'done' && 'Done'}
                     </span>
                     <span className="badge rounded-pill bg-secondary" style={{ fontSize: '0.7rem' }}>
@@ -540,7 +545,7 @@ export default function TasksPage() {
                       onClick={() => handleOpenTask(t.id)}
                     >
                       <div className="d-flex align-items-center justify-content-between mb-2">
-                        <span className="badge bg-secondary font-monospace" style={{ fontSize: '0.7rem' }}>
+                        <span className="badge bg-secondary fw-semibold" style={{ fontSize: '0.7rem', fontVariantNumeric: 'tabular-nums' }}>
                           {t.task_key || `TASK-${t.id}`}
                         </span>
                         <PriorityBadge priority={t.priority} />
@@ -552,7 +557,7 @@ export default function TasksPage() {
 
                       {t.is_blocked && (
                         <div className="badge bg-danger-subtle text-danger mb-2 p-1 w-100 text-start">
-                          <i className="bi bi-flag-fill me-1"></i>BLOCKED: {t.blocker_reason || 'Pending resolution'}
+                          <i className="bi bi-flag-fill me-1"></i>Blocked: {t.blocker_reason || 'Pending resolution'}
                         </div>
                       )}
 
@@ -655,7 +660,7 @@ export default function TasksPage() {
       {/* VIEW 4: TIMELINE / GANTT VIEW */}
       {viewMode === 'timeline' && (
         <div className="timeline-container">
-          <div className="fw-semibold small text-muted text-uppercase mb-3">
+          <div className="fw-semibold small text-muted mb-3">
             Schedule Overview & Deliverable Timeline
           </div>
 
@@ -664,7 +669,7 @@ export default function TasksPage() {
               <div key={task.id} className="timeline-row">
                 <div className="timeline-task-info">
                   <div className="fw-semibold small text-truncate" style={{ cursor: 'pointer' }} onClick={() => handleOpenTask(task.id)}>
-                    <span className="badge bg-secondary font-monospace me-1" style={{ fontSize: '0.65rem' }}>
+                    <span className="badge bg-secondary fw-semibold me-1" style={{ fontSize: '0.65rem', fontVariantNumeric: 'tabular-nums' }}>
                       {task.task_key || `TASK-${task.id}`}
                     </span>
                     {task.title}

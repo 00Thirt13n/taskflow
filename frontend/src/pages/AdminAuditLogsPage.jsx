@@ -95,7 +95,7 @@ export default function AdminAuditLogsPage() {
           ) : (
             <div className="table-responsive">
               <table className="table table-hover align-middle mb-0">
-                <thead className="table-light text-muted small text-uppercase">
+                <thead className="table-light text-muted small fw-semibold">
                   <tr>
                     <th scope="col">Timestamp (UTC)</th>
                     <th scope="col">Action</th>

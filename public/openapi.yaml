@@ -4,6 +4,8 @@ info:
   description: High-performance, production-ready Enterprise Work Management REST API built with Laravel 11, Sanctum, MySQL 8, and React 18.
   version: 2.0.0
 servers:
+  - url: https://taskflow.pochyaa.com/api
+    description: Public Production / Review API server
   - url: http://localhost:8000/api
     description: Local development API server
   - url: /api

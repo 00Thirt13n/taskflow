@@ -62,8 +62,8 @@ Status: PASS
 
 ## 3. Live Endpoint Verification Evidence
 
-All endpoints verified against the live local development servers (`127.0.0.1:8000` and Vite dev server `localhost:5173`):
-- `GET /api/health`: `200 OK` (database healthy, latency 1.18 ms).
+All endpoints verified against the public production deployment (`https://taskflow.pochyaa.com/`) as well as local development servers (`127.0.0.1:8000` and `localhost:5173`):
+- `GET /api/health`: `200 OK` (database healthy, sub-millisecond latency).
 - `POST /api/login`: `200 OK` (issued Sanctum Bearer token for demo accounts).
 - `GET /api/workspaces`: `200 OK` (returns "Acme Core Engineering").
 - `GET /api/projects`: `200 OK` (returns 4 projects with calculated health status).

@@ -3,141 +3,149 @@ import { Link } from 'react-router-dom';
 
 export default function PricingPage() {
   return (
-    <div className="py-4">
-      {/* Pricing Hero */}
-      <section className="text-center py-5">
-        <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1 mb-3">
-          Transparent Editions
-        </span>
-        <h1 className="hero-headline mx-auto" style={{ maxWidth: '820px' }}>
-          Predictable pricing for growing teams.
+    <div className="tf-page-container py-5">
+      {/* ── Pricing Hero ── */}
+      <section className="text-center pt-3 pb-5">
+        <div className="d-flex justify-content-center mb-4">
+          <div className="pochyaa-eyebrow">
+            <span className="ping-beacon">
+              <span className="ping-beacon-wave"></span>
+              <span className="ping-beacon-dot"></span>
+            </span>
+            <span>TRANSPARENT VALUE ARCHITECTURE</span>
+            <span style={{ color: '#64748b' }}>•</span>
+            <span style={{ color: '#38bdf8' }}>Zero Hidden Fees</span>
+          </div>
+        </div>
+
+        <h1 className="hero-headline mx-auto" style={{ maxWidth: '880px' }}>
+          Predictable pricing for <span className="text-gradient-blue">high-velocity engineering</span>.
         </h1>
-        <p className="hero-subhead">
+        <p className="hero-subhead mx-auto" style={{ maxWidth: '680px' }}>
           Explore the live platform today in the free demonstration environment, or preview our commercial team tiers.
         </p>
       </section>
 
-      {/* Pricing Cards */}
-      <section className="py-4 border-top" style={{ borderColor: 'var(--tf-border)' }}>
+      {/* ── Pricing Cards Grid ── */}
+      <section className="py-4 border-top">
         <div className="row g-4 justify-content-center">
-          {/* Community & Demo Tier */}
+          {/* Community & Demo Tier (Featured) */}
           <div className="col-12 col-md-6 col-lg-4">
-            <div className="pricing-tier-card featured">
-              <div className="d-flex justify-content-between align-items-center mb-2">
-                <span className="fw-bold text-primary small text-uppercase">Live Portfolio Demo</span>
-                <span className="badge bg-success bg-opacity-10 text-success">Active Now</span>
-              </div>
-              <h3 className="fw-bold text-body mb-1">Community Demo</h3>
-              <div className="d-flex align-items-baseline gap-1 my-3">
-                <span className="fs-1 fw-bold text-body">$0</span>
-                <span className="text-muted small">/ free exploration</span>
-              </div>
-              <p className="text-muted small mb-4">
-                Full access to the live demonstration environment seeded with Northstar Engineering workspace data.
-              </p>
+            <div className="pochyaa-card p-4 h-100 d-flex flex-column justify-content-between" style={{ border: '1px solid rgba(59, 130, 246, 0.5)', boxShadow: '0 10px 30px -5px rgba(37, 99, 235, 0.2)' }}>
+              <div>
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <span className="fw-semibold text-primary font-monospace small">Live Portfolio Demo</span>
+                  <span className="badge font-monospace" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>Active Now</span>
+                </div>
+                <h3 className="fw-bold text-body mb-1">Community Demo</h3>
+                <div className="d-flex align-items-baseline gap-1 my-3">
+                  <span className="fs-1 fw-bold text-body font-monospace">$0</span>
+                  <span className="text-muted small font-monospace">/ free exploration</span>
+                </div>
+                <p className="text-secondary small mb-4" style={{ lineHeight: 1.6 }}>
+                  Full access to the live demonstration environment seeded with Northstar Engineering workspace data.
+                </p>
 
-              <Link to="/login" className="btn btn-primary w-100 fw-semibold mb-4">
-                Launch Live Demo <i className="bi bi-arrow-right ms-1"></i>
-              </Link>
+                <Link to="/login" className="btn-pochyaa-primary w-100 mb-4 text-center">
+                  <span>Launch Interactive Demo</span>
+                  <i className="bi bi-arrow-right ms-1"></i>
+                </Link>
 
-              <div className="border-top pt-3">
-                <span className="small fw-bold text-body d-block mb-2">Included Capabilities:</span>
-                <ul className="list-unstyled d-flex flex-column gap-2 small text-muted mb-0">
-                  <li><i className="bi bi-check2 text-success me-2 fw-bold"></i> 4-Tier Workspace & Project Hierarchy</li>
-                  <li><i className="bi bi-check2 text-success me-2 fw-bold"></i> Interactive Table, Kanban, Calendar, and Timeline</li>
-                  <li><i className="bi bi-check2 text-success me-2 fw-bold"></i> Slide-over Task Detail Drawer & Subtasks</li>
-                  <li><i className="bi bi-check2 text-success me-2 fw-bold"></i> Grounded AI Natural Language Parser</li>
-                  <li><i className="bi bi-check2 text-success me-2 fw-bold"></i> Admin User Management & Audit Logs</li>
-                  <li><i className="bi bi-check2 text-success me-2 fw-bold"></i> Sub-0.09 ms MySQL B-Tree Performance</li>
-                </ul>
+                <div className="border-top pt-3">
+                  <span className="small fw-bold text-body font-monospace d-block mb-2">Included Capabilities:</span>
+                  <ul className="list-unstyled d-flex flex-column gap-2 small text-secondary font-monospace mb-0">
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-success fw-bold"></i> <span className="text-slate-300">4-Tier Workspace & Project Hierarchy</span></li>
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-success fw-bold"></i> <span className="text-slate-300">Interactive Table, Kanban, and Timeline</span></li>
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-success fw-bold"></i> <span className="text-slate-300">Slide-over Detail Drawer & Subtasks</span></li>
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-success fw-bold"></i> <span className="text-slate-300">Grounded AI Task Decomposer</span></li>
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-success fw-bold"></i> <span className="text-slate-300">Admin User Roster & Immutable Audit Logs</span></li>
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-success fw-bold"></i> <span className="text-slate-300">Sub-0.09 ms MySQL B-Tree Performance</span></li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Team Workspace Tier */}
           <div className="col-12 col-md-6 col-lg-4">
-            <div className="pricing-tier-card">
-              <div className="d-flex justify-content-between align-items-center mb-2">
-                <span className="fw-bold text-muted small text-uppercase">Team Edition</span>
-                <span className="badge bg-secondary bg-opacity-10 text-muted">Preview</span>
-              </div>
-              <h3 className="fw-bold text-body mb-1">Team Workspace</h3>
-              <div className="d-flex align-items-baseline gap-1 my-3">
-                <span className="fs-1 fw-bold text-body">$12</span>
-                <span className="text-muted small">/ member / month</span>
-              </div>
-              <p className="text-muted small mb-4">
-                Dedicated multi-tenant workspace with isolated databases and custom domain branding.
-              </p>
+            <div className="pochyaa-card p-4 h-100 d-flex flex-column justify-content-between">
+              <div>
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <span className="fw-semibold text-muted font-monospace small">Team Edition</span>
+                  <span className="badge font-monospace" style={{ background: 'rgba(51, 65, 85, 0.2)', color: 'var(--tf-text-secondary)' }}>Preview</span>
+                </div>
+                <h3 className="fw-bold text-body mb-1">Team Workspace</h3>
+                <div className="d-flex align-items-baseline gap-1 my-3">
+                  <span className="fs-1 fw-bold text-body font-monospace">$12</span>
+                  <span className="text-muted small font-monospace">/ user / month</span>
+                </div>
+                <p className="text-secondary small mb-4" style={{ lineHeight: 1.6 }}>
+                  Built for engineering squads requiring isolated workspaces, custom milestones, and continuous delivery gates.
+                </p>
 
-              <Link to="/contact" className="btn btn-outline-secondary w-100 fw-medium mb-4">
-                Request Early Access
-              </Link>
+                <Link to="/contact" className="btn btn-outline-secondary w-100 fw-semibold mb-4 py-2" style={{ borderRadius: '0.75rem' }}>
+                  Contact for Early Access
+                </Link>
 
-              <div className="border-top pt-3">
-                <span className="small fw-bold text-body d-block mb-2">Everything in Community, plus:</span>
-                <ul className="list-unstyled d-flex flex-column gap-2 small text-muted mb-0">
-                  <li><i className="bi bi-check2 text-primary me-2 fw-bold"></i> Unlimited Workspaces & Projects</li>
-                  <li><i className="bi bi-check2 text-primary me-2 fw-bold"></i> Custom Domain (taskflow.yourdomain.com)</li>
-                  <li><i className="bi bi-check2 text-primary me-2 fw-bold"></i> Dedicated Redis Cache & Queue Workers</li>
-                  <li><i className="bi bi-check2 text-primary me-2 fw-bold"></i> Automated Daily MySQL Database Snapshots</li>
-                  <li><i className="bi bi-check2 text-primary me-2 fw-bold"></i> Webhook Event Integrations (Slack / GitHub)</li>
-                </ul>
+                <div className="border-top pt-3">
+                  <span className="small fw-bold text-body font-monospace d-block mb-2">Everything in Demo, plus:</span>
+                  <ul className="list-unstyled d-flex flex-column gap-2 small text-secondary font-monospace mb-0">
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-primary fw-bold"></i> <span className="text-slate-300">Unlimited Projects and Milestones</span></li>
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-primary fw-bold"></i> <span className="text-slate-300">Custom Role & Permission Matrix</span></li>
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-primary fw-bold"></i> <span className="text-slate-300">Automated Webhook & Slack Integrations</span></li>
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-primary fw-bold"></i> <span className="text-slate-300">30-day Immutable Audit Log Retention</span></li>
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-primary fw-bold"></i> <span className="text-slate-300">Priority Support SLA</span></li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Enterprise Cloud Tier */}
+          {/* Enterprise Self-Hosted Tier */}
           <div className="col-12 col-md-6 col-lg-4">
-            <div className="pricing-tier-card">
-              <div className="d-flex justify-content-between align-items-center mb-2">
-                <span className="fw-bold text-muted small text-uppercase">Enterprise</span>
-                <span className="badge bg-secondary bg-opacity-10 text-muted">Roadmap</span>
-              </div>
-              <h3 className="fw-bold text-body mb-1">Enterprise Cloud</h3>
-              <div className="d-flex align-items-baseline gap-1 my-3">
-                <span className="fs-1 fw-bold text-body">Custom</span>
-              </div>
-              <p className="text-muted small mb-4">
-                Air-gapped on-premises deployment, SAML 2.0 / Okta SSO, and dedicated MySQL read replicas.
-              </p>
+            <div className="pochyaa-card p-4 h-100 d-flex flex-column justify-content-between">
+              <div>
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <span className="fw-semibold text-info font-monospace small">Self-Hosted</span>
+                  <span className="badge font-monospace" style={{ background: 'rgba(6, 182, 212, 0.15)', color: '#0891b2' }}>Custom</span>
+                </div>
+                <h3 className="fw-bold text-body mb-1">Enterprise Appliance</h3>
+                <div className="d-flex align-items-baseline gap-1 my-3">
+                  <span className="fs-1 fw-bold text-body font-monospace">$29</span>
+                  <span className="text-muted small font-monospace">/ user / month</span>
+                </div>
+                <p className="text-secondary small mb-4" style={{ lineHeight: 1.6 }}>
+                  Deploy on your own AWS, GCP, or on-premise Docker/Kubernetes infrastructure with full database sovereignty.
+                </p>
 
-              <Link to="/contact" className="btn btn-outline-secondary w-100 fw-medium mb-4">
-                Contact Engineering
-              </Link>
+                <Link to="/contact" className="btn btn-outline-secondary w-100 fw-semibold mb-4 py-2" style={{ borderRadius: '0.75rem' }}>
+                  Request Enterprise Architecture
+                </Link>
 
-              <div className="border-top pt-3">
-                <span className="small fw-bold text-body d-block mb-2">Enterprise Infrastructure:</span>
-                <ul className="list-unstyled d-flex flex-column gap-2 small text-muted mb-0">
-                  <li><i className="bi bi-check2 text-primary me-2 fw-bold"></i> Self-Hosted Docker / Kubernetes Helm Charts</li>
-                  <li><i className="bi bi-check2 text-primary me-2 fw-bold"></i> SAML 2.0 / Okta / Azure AD SSO Integration</li>
-                  <li><i className="bi bi-check2 text-primary me-2 fw-bold"></i> MySQL Read Replicas & High Availability</li>
-                  <li><i className="bi bi-check2 text-primary me-2 fw-bold"></i> 99.9% Uptime Service Level Agreement</li>
-                  <li><i className="bi bi-check2 text-primary me-2 fw-bold"></i> Custom Security Compliance Auditing</li>
-                </ul>
+                <div className="border-top pt-3">
+                  <span className="small fw-bold text-body font-monospace d-block mb-2">Enterprise Controls:</span>
+                  <ul className="list-unstyled d-flex flex-column gap-2 small text-secondary font-monospace mb-0">
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-info fw-bold"></i> <span className="text-slate-300">Docker & Kubernetes Helm Charts</span></li>
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-info fw-bold"></i> <span className="text-slate-300">SAML 2.0 / Okta / Azure AD Single Sign-On</span></li>
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-info fw-bold"></i> <span className="text-slate-300">Air-Gapped & Offline Deployment</span></li>
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-info fw-bold"></i> <span className="text-slate-300">Indefinite Immutable Audit Log Retention</span></li>
+                    <li className="d-flex align-items-center gap-2"><i className="bi bi-check2 text-info fw-bold"></i> <span className="text-slate-300">Dedicated Engineering Account Manager</span></li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Transparent FAQ */}
-      <section className="py-5 border-top my-3" style={{ borderColor: 'var(--tf-border)' }}>
-        <h3 className="fw-bold text-body text-center mb-4">Frequently Asked Questions</h3>
-        <div className="row g-4 mx-auto" style={{ maxWidth: '840px' }}>
-          <div className="col-12 col-md-6">
-            <h6 className="fw-bold text-body">Is the Community Demo really free?</h6>
-            <p className="text-muted small">
-              Yes! The demo environment is hosted live and seeded with realistic engineering projects so recruiters, engineering managers, and clients can explore all features freely.
-            </p>
-          </div>
-          <div className="col-12 col-md-6">
-            <h6 className="fw-bold text-body">How is data isolated between users?</h6>
-            <p className="text-muted small">
-              Data isolation is enforced strictly on the server side using Laravel Policies and scoped Eloquent relations. Cross-tenant reads and mutations are intercepted and return <code>403 Forbidden</code>.
-            </p>
-          </div>
-        </div>
+      {/* ── Pricing Bottom CTA ── */}
+      <section className="text-center py-5 border-top">
+        <h3 className="fw-extrabold text-body mb-2">Want to test the full feature set right now?</h3>
+        <p className="text-muted mb-4">No registration or credit card required. One click enters the live sandbox.</p>
+        <Link to="/login" className="btn-pochyaa-primary">
+          <span>Enter Live Workspace Sandbox</span>
+          <i className="bi bi-arrow-right ms-1"></i>
+        </Link>
       </section>
     </div>
   );

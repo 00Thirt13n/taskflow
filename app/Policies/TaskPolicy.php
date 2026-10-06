@@ -20,7 +20,16 @@ class TaskPolicy
      */
     public function view(User $user, Task $task): bool
     {
-        return $user->isAdmin() || $task->user_id === $user->id;
+        if ($user->isAdmin() || $task->user_id === $user->id || $task->assignee_id === $user->id) {
+            return true;
+        }
+
+        if ($task->project_id && $task->project) {
+            return $task->project->owner_id === $user->id
+                || $task->project->members()->where('users.id', $user->id)->exists();
+        }
+
+        return false;
     }
 
     /**
@@ -36,7 +45,16 @@ class TaskPolicy
      */
     public function update(User $user, Task $task): bool
     {
-        return $user->isAdmin() || $task->user_id === $user->id;
+        if ($user->isAdmin() || $task->user_id === $user->id || $task->assignee_id === $user->id) {
+            return true;
+        }
+
+        if ($task->project_id && $task->project) {
+            return $task->project->owner_id === $user->id
+                || $task->project->members()->where('users.id', $user->id)->exists();
+        }
+
+        return false;
     }
 
     /**
@@ -44,6 +62,14 @@ class TaskPolicy
      */
     public function delete(User $user, Task $task): bool
     {
-        return $user->isAdmin() || $task->user_id === $user->id;
+        if ($user->isAdmin() || $task->user_id === $user->id) {
+            return true;
+        }
+
+        if ($task->project_id && $task->project && $task->project->owner_id === $user->id) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -103,18 +103,19 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 2. QUICK ACTIONS BAR */}
-      <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-        <div className="d-flex align-items-center gap-2">
-          <Link to="/app/tasks" className="btn btn-outline-secondary btn-sm fw-medium">
-            <i className="bi bi-kanban me-1"></i> Kanban Board
-          </Link>
-          <Link to="/app/my-work" className="btn btn-outline-secondary btn-sm fw-medium">
-            <i className="bi bi-check2-circle text-success me-1"></i> My Work
-          </Link>
-          <Link to="/app/projects" className="btn btn-outline-secondary btn-sm fw-medium">
-            <i className="bi bi-folder2-open text-primary me-1"></i> All Projects
-          </Link>
+      {/* 2. SPRINT STATUS CONTEXT STRIP */}
+      <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2 pb-2 border-bottom" style={{ borderColor: 'var(--tf-border)' }}>
+        <div className="d-flex align-items-center gap-3">
+          <div className="d-flex align-items-center gap-2">
+            <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">
+              Active Sprint
+            </span>
+            <span className="small text-body fw-medium">Sprint 24 (Oct 6 – Oct 17)</span>
+          </div>
+          <span className="text-muted d-none d-sm-inline" style={{ fontSize: '0.8125rem' }}>•</span>
+          <span className="text-muted small d-none d-sm-inline">
+            Target delivery: 8 days remaining
+          </span>
         </div>
 
         <div className="text-muted small">
@@ -141,7 +142,7 @@ export default function DashboardPage() {
                   onClick={() => handleOpenTask(task.id)}
                 >
                   <div className="d-flex justify-content-between align-items-center mb-1">
-                    <span className="font-monospace fw-bold text-primary small">
+                    <span className="fw-semibold text-primary small" style={{ fontVariantNumeric: 'tabular-nums' }}>
                       {task.task_key || `TASK-${task.id}`}
                     </span>
                     <PriorityBadge priority={task.priority} />
@@ -155,7 +156,7 @@ export default function DashboardPage() {
                   )}
                   <div className="d-flex justify-content-between align-items-center text-muted small" style={{ fontSize: '0.75rem' }}>
                     <span>Due: {task.due_date || 'No date'}</span>
-                    <span className="text-primary fw-medium">Inspect →</span>
+                    <span className="text-primary fw-medium">Inspect</span>
                   </div>
                 </div>
               </div>
@@ -201,7 +202,7 @@ export default function DashboardPage() {
                         <Link to={`/app/projects/${proj.id}`} className="fw-semibold text-body small text-decoration-none hover-link">
                           {proj.name}
                         </Link>
-                        <span className="text-muted font-monospace small" style={{ fontSize: '0.68rem' }}>
+                        <span className="text-muted small" style={{ fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums' }}>
                           [{proj.key}]
                         </span>
                       </div>
@@ -275,20 +276,20 @@ export default function DashboardPage() {
             <i className="bi bi-list-task text-primary me-2"></i> High Priority Deliverables
           </h6>
           <Link to="/app/tasks" className="text-primary small text-decoration-none fw-medium">
-            View All Tasks →
+            View all tasks
           </Link>
         </div>
 
         <div className="table-responsive">
           <table className="table table-hover align-middle mb-0 small">
             <thead>
-              <tr className="text-muted text-uppercase" style={{ fontSize: '0.7rem' }}>
+              <tr className="text-muted" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
                 <th style={{ width: '40px' }}>Done</th>
-                <th>Work Item</th>
+                <th>Work item</th>
                 <th>Project</th>
                 <th>Status</th>
                 <th>Priority</th>
-                <th>Target Date</th>
+                <th>Target date</th>
                 <th>Assignee</th>
               </tr>
             </thead>
@@ -305,7 +306,7 @@ export default function DashboardPage() {
                   </td>
                   <td onClick={() => handleOpenTask(task.id)}>
                     <div className="fw-semibold text-body">{task.title}</div>
-                    <span className="font-monospace text-primary" style={{ fontSize: '0.7rem' }}>
+                    <span className="text-primary fw-medium" style={{ fontSize: '0.7rem', fontVariantNumeric: 'tabular-nums' }}>
                       {task.task_key || `TASK-${task.id}`}
                     </span>
                   </td>

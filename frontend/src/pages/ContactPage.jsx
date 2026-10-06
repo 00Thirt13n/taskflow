@@ -24,94 +24,110 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="py-4">
-      <section className="text-center py-5">
-        <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1 mb-3">
-          Get in Touch
-        </span>
-        <h1 className="hero-headline mx-auto" style={{ maxWidth: '780px' }}>
-          Connect with the TaskFlow team.
+    <div className="tf-page-container py-5">
+      {/* ── Contact Hero ── */}
+      <section className="text-center pt-3 pb-5">
+        <div className="d-flex justify-content-center mb-4">
+          <div className="pochyaa-eyebrow">
+            <span className="ping-beacon">
+              <span className="ping-beacon-wave"></span>
+              <span className="ping-beacon-dot"></span>
+            </span>
+            <span>DIRECT ACCESS</span>
+            <span style={{ color: '#64748b' }}>•</span>
+            <span style={{ color: '#38bdf8' }}>Engineering & Product Relations</span>
+          </div>
+        </div>
+
+        <h1 className="hero-headline mx-auto" style={{ maxWidth: '820px' }}>
+          Connect with the <span className="text-gradient-blue">TaskFlow engineering team</span>.
         </h1>
-        <p className="hero-subhead">
+        <p className="hero-subhead mx-auto" style={{ maxWidth: '640px' }}>
           Have questions about the architecture, want to schedule a tailored walkthrough, or explore deployment on your own infrastructure? Let’s talk.
         </p>
       </section>
 
+      {/* ── Main Contact & Form Section ── */}
       <section className="pb-5">
-        <div className="row g-5 justify-content-center mx-auto" style={{ maxWidth: '960px' }}>
+        <div className="row g-5 justify-content-center mx-auto" style={{ maxWidth: '1020px' }}>
+          {/* Direct Channels */}
           <div className="col-12 col-md-5">
-            <h4 className="fw-bold text-body mb-3">Direct Inquiries</h4>
-            <p className="text-muted small mb-4" style={{ lineHeight: 1.6 }}>
-              TaskFlow is engineered as an open-source, enterprise-grade work management showcase. We welcome technical interviews, engineering discussions, and product reviews.
-            </p>
+            <div className="pochyaa-card p-4 mb-4">
+              <h4 className="fw-bold text-body mb-3">Direct Inquiries</h4>
+              <p className="text-secondary small mb-4" style={{ lineHeight: 1.65 }}>
+                TaskFlow is engineered as an open-source, enterprise-grade work management showcase. We welcome technical interviews, engineering discussions, and product reviews.
+              </p>
 
-            <div className="d-flex flex-column gap-3 small mb-4">
-              <div className="d-flex align-items-center gap-3">
-                <div className="avatar-circle" style={{ width: 36, height: 36, backgroundColor: 'rgba(99, 102, 241, 0.1)', color: '#6366f1' }}>
-                  <i className="bi bi-github"></i>
+              <div className="d-flex flex-column gap-3 small font-monospace">
+                <div className="d-flex align-items-center gap-3">
+                  <div className="rounded-3 d-flex align-items-center justify-content-center" style={{ width: 36, height: 36, backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' }}>
+                    <i className="bi bi-github"></i>
+                  </div>
+                  <div>
+                    <div className="fw-bold text-body">Source Code</div>
+                    <a href="https://github.com/00thirt13n/taskflow" target="_blank" rel="noreferrer" className="text-muted text-decoration-none">
+                      github.com/00thirt13n/taskflow
+                    </a>
+                  </div>
                 </div>
-                <div>
-                  <div className="fw-bold text-body">Source Code</div>
-                  <a href="https://github.com/00thirt13n/taskflow" target="_blank" rel="noreferrer" className="text-muted">
-                    github.com/00thirt13n/taskflow
-                  </a>
-                </div>
-              </div>
 
-              <div className="d-flex align-items-center gap-3">
-                <div className="avatar-circle" style={{ width: 36, height: 36, backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
-                  <i className="bi bi-file-earmark-code"></i>
+                <div className="d-flex align-items-center gap-3">
+                  <div className="rounded-3 d-flex align-items-center justify-content-center" style={{ width: 36, height: 36, backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                    <i className="bi bi-file-earmark-code"></i>
+                  </div>
+                  <div>
+                    <div className="fw-bold text-body">API Specification</div>
+                    <a href="/openapi.yaml" target="_blank" rel="noreferrer" className="text-muted text-decoration-none">
+                      OpenAPI 3.0 Interactive Contract
+                    </a>
+                  </div>
                 </div>
-                <div>
-                  <div className="fw-bold text-body">API Specification</div>
-                  <a href="/openapi.yaml" target="_blank" rel="noreferrer" className="text-muted">
-                    OpenAPI 3.0 Interactive Contract
-                  </a>
-                </div>
-              </div>
 
-              <div className="d-flex align-items-center gap-3">
-                <div className="avatar-circle" style={{ width: 36, height: 36, backgroundColor: 'rgba(6, 182, 212, 0.1)', color: '#06b6d4' }}>
-                  <i className="bi bi-activity"></i>
-                </div>
-                <div>
-                  <div className="fw-bold text-body">System Health</div>
-                  <Link to="/status" className="text-muted">
-                    Live Operational Status (/status)
-                  </Link>
+                <div className="d-flex align-items-center gap-3">
+                  <div className="rounded-3 d-flex align-items-center justify-content-center" style={{ width: 36, height: 36, backgroundColor: 'rgba(6, 182, 212, 0.15)', color: '#06b6d4' }}>
+                    <i className="bi bi-activity"></i>
+                  </div>
+                  <div>
+                    <div className="fw-bold text-body">System Health</div>
+                    <Link to="/status" className="text-muted text-decoration-none">
+                      Live Operational Status (/status)
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="p-3 border rounded bg-subtle small">
+            <div className="tier-rule-row flex-column align-items-start p-3 mb-4">
               <span className="fw-bold text-body d-block mb-1">Looking for immediate testing?</span>
-              <span className="text-muted d-block mb-2">You don’t need to wait for a demo callback. Use our instant one-click login buttons:</span>
-              <Link to="/login" className="btn btn-outline-primary btn-sm fw-medium">
+              <span className="text-muted d-block mb-3">You don’t need to wait for a demo callback. Use our instant one-click login buttons:</span>
+              <Link to="/login" className="btn btn-outline-primary btn-sm fw-medium font-monospace w-100">
                 Launch 1-Click Persona Demo
               </Link>
             </div>
           </div>
 
+          {/* Form */}
           <div className="col-12 col-md-7">
-            <div className="tf-card p-4 shadow-sm border">
+            <div className="pochyaa-card p-4 p-md-5">
               {submitted ? (
                 <div className="text-center py-5">
-                  <div className="avatar-circle mx-auto mb-3" style={{ width: 56, height: 56, backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', fontSize: 24 }}>
+                  <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 56, height: 56, backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', fontSize: 24 }}>
                     <i className="bi bi-check-lg"></i>
                   </div>
                   <h4 className="fw-bold text-body mb-2">Inquiry Submitted</h4>
-                  <p className="text-muted small mb-4">
-                    Thank you, {formData.name}! Your message has been logged. In the meantime, you can explore the live application immediately.
+                  <p className="text-secondary small mb-4">
+                    Thank you, {formData.name}! Your message has been received. In the meantime, you can explore the live application immediately.
                   </p>
-                  <Link to="/login" className="btn btn-primary">
-                    Enter Live Demo Now
+                  <Link to="/login" className="btn-pochyaa-primary">
+                    <span>Enter Live Demo Now</span>
+                    <i className="bi bi-arrow-right ms-1"></i>
                   </Link>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit}>
                   <h5 className="fw-bold text-body mb-3">Schedule Walkthrough / Inquiry</h5>
                   <div className="mb-3">
-                    <label className="form-label small fw-semibold text-body">Your Name *</label>
+                    <label className="form-label small fw-semibold text-secondary">Your Name *</label>
                     <input
                       type="text"
                       className="form-control"
@@ -123,7 +139,7 @@ export default function ContactPage() {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label small fw-semibold text-body">Work Email *</label>
+                    <label className="form-label small fw-semibold text-secondary">Work Email *</label>
                     <input
                       type="email"
                       className="form-control"
@@ -136,7 +152,7 @@ export default function ContactPage() {
 
                   <div className="row g-2 mb-3">
                     <div className="col-6">
-                      <label className="form-label small fw-semibold text-body">Team Size</label>
+                      <label className="form-label small fw-semibold text-secondary">Team Size</label>
                       <select
                         className="form-select"
                         value={formData.teamSize}
@@ -148,7 +164,7 @@ export default function ContactPage() {
                       </select>
                     </div>
                     <div className="col-6">
-                      <label className="form-label small fw-semibold text-body">Primary Interest</label>
+                      <label className="form-label small fw-semibold text-secondary">Primary Interest</label>
                       <select
                         className="form-select"
                         value={formData.interest}
@@ -163,7 +179,7 @@ export default function ContactPage() {
                   </div>
 
                   <div className="mb-4">
-                    <label className="form-label small fw-semibold text-body">Message / Context</label>
+                    <label className="form-label small fw-semibold text-secondary">Message / Context</label>
                     <textarea
                       className="form-control"
                       rows={4}
@@ -173,8 +189,9 @@ export default function ContactPage() {
                     ></textarea>
                   </div>
 
-                  <button type="submit" className="btn btn-primary w-100 fw-semibold py-2">
-                    Submit Inquiry <i className="bi bi-send ms-1"></i>
+                  <button type="submit" className="btn-pochyaa-primary w-100">
+                    <span>Submit Inquiry</span>
+                    <i className="bi bi-send ms-1"></i>
                   </button>
                 </form>
               )}

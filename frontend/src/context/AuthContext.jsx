@@ -65,8 +65,12 @@ export const AuthProvider = ({ children }) => {
     };
   }, [logout]);
 
-  const login = async (credentials) => {
-    const data = await authService.login(credentials);
+  const login = async (emailOrCredentials, maybePassword) => {
+    const payload =
+      typeof emailOrCredentials === 'object' && emailOrCredentials !== null
+        ? emailOrCredentials
+        : { email: emailOrCredentials, password: maybePassword };
+    const data = await authService.login(payload);
     setUser(data.user);
     setToken(data.token);
     localStorage.setItem('taskflow_token', data.token);

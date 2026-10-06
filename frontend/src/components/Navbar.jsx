@@ -21,7 +21,7 @@ export default function Navbar() {
           <span className="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-2 p-1" style={{ width: '32px', height: '32px' }}>
             <i className="bi bi-check2-square fs-5"></i>
           </span>
-          <span className="fs-5 tracking-tight text-dark">Task<span className="text-primary">Flow</span></span>
+          <span className="fs-5 tracking-tight text-body">Task<span className="text-primary">Flow</span></span>
         </Link>
 
         <button
@@ -69,7 +69,7 @@ export default function Navbar() {
               <div className="d-flex align-items-center gap-3">
                 <div className="d-flex align-items-center gap-2">
                   <div className="text-end d-none d-md-block">
-                    <div className="fw-semibold small text-dark">{user?.name}</div>
+                    <div className="fw-semibold small text-body">{user?.name}</div>
                     <div className="text-muted" style={{ fontSize: '0.75rem' }}>{user?.email}</div>
                   </div>
                   <span className={`badge ${isAdmin ? 'bg-indigo text-white bg-primary' : 'bg-secondary'}`} style={{ fontSize: '0.75rem' }}>

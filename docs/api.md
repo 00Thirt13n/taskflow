@@ -9,7 +9,11 @@ Accept: application/json
 Content-Type: application/json
 ```
 
-An OpenAPI 3.0 specification is available at [`public/openapi.yaml`](file:///var/www/html/task_manager/public/openapi.yaml).
+An OpenAPI 3.0 specification is available at [`public/openapi.yaml`](file:///var/www/html/task_manager/public/openapi.yaml) (hosted live at `https://taskflow.pochyaa.com/openapi.yaml`).
+
+### Base URLs
+- **Live Public Review Base URL**: `https://taskflow.pochyaa.com/api`
+- **Local Development Base URL**: `http://localhost:8000/api`
 
 ---
 

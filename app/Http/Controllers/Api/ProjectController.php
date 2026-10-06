@@ -22,7 +22,10 @@ class ProjectController extends Controller
     {
         $user = $request->user();
 
+        $workspaceId = $request->input('workspace_id', 1);
+
         $query = Project::with(['owner', 'members'])
+            ->where('workspace_id', $workspaceId)
             ->orderBy('created_at', 'desc');
 
         if (!$user->isAdmin()) {
@@ -177,6 +180,12 @@ class ProjectController extends Controller
 
     public function addMember(Request $request, Project $project): JsonResponse
     {
+        $user = $request->user();
+
+        if (!$user->isAdmin() && $project->owner_id !== $user->id) {
+            return response()->json(['message' => 'Only the project owner or an administrator can manage project members.'], 403);
+        }
+
         $validated = $request->validate([
             'user_id' => ['required', 'exists:users,id'],
             'role' => ['required', 'in:owner,manager,member,viewer'],
@@ -191,6 +200,12 @@ class ProjectController extends Controller
 
     public function removeMember(Request $request, Project $project, User $user): JsonResponse
     {
+        $authUser = $request->user();
+
+        if (!$authUser->isAdmin() && $project->owner_id !== $authUser->id) {
+            return response()->json(['message' => 'Only the project owner or an administrator can manage project members.'], 403);
+        }
+
         $project->members()->detach($user->id);
         return response()->json(['message' => 'Member removed successfully.']);
     }

@@ -108,7 +108,7 @@ export default function MyWorkPage() {
                           }}
                         />
                         <div>
-                          <span className="badge bg-secondary font-monospace me-2" style={{ fontSize: '0.7rem' }}>
+                          <span className="badge bg-secondary fw-semibold me-2" style={{ fontSize: '0.7rem', fontVariantNumeric: 'tabular-nums' }}>
                             {t.task_key}
                           </span>
                           <span className="fw-semibold text-danger">{t.title}</span>
@@ -156,7 +156,7 @@ export default function MyWorkPage() {
                         }}
                       />
                       <div>
-                        <span className="badge bg-secondary font-monospace me-2" style={{ fontSize: '0.7rem' }}>
+                        <span className="badge bg-secondary fw-semibold me-2" style={{ fontSize: '0.7rem', fontVariantNumeric: 'tabular-nums' }}>
                           {t.task_key}
                         </span>
                         <span className="fw-semibold">{t.title}</span>
@@ -205,7 +205,7 @@ export default function MyWorkPage() {
                         }}
                       />
                       <div>
-                        <span className="badge bg-secondary font-monospace me-2" style={{ fontSize: '0.7rem' }}>
+                        <span className="badge bg-secondary fw-semibold me-2" style={{ fontSize: '0.7rem', fontVariantNumeric: 'tabular-nums' }}>
                           {t.task_key}
                         </span>
                         <span className="fw-semibold">{t.title}</span>

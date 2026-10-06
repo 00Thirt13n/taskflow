@@ -154,7 +154,7 @@ export default function Sidebar({ isOpen, onCloseMobile }) {
                   <span className="text-truncate flex-grow-1" style={{ fontSize: '0.8125rem' }}>
                     {proj.name}
                   </span>
-                  <span className="text-muted font-monospace" style={{ fontSize: '0.65rem' }}>
+                  <span className="text-muted fw-medium" style={{ fontSize: '0.6875rem', fontVariantNumeric: 'tabular-nums' }}>
                     {proj.key}
                   </span>
                 </NavLink>

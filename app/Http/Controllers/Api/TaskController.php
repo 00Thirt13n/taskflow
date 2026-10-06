@@ -438,6 +438,12 @@ class TaskController extends Controller
      */
     public function deleteComment(Request $request, Task $task, Comment $comment): JsonResponse
     {
+        Gate::authorize('view', $task);
+
+        if ((int) $comment->task_id !== (int) $task->id) {
+            return response()->json(['message' => 'Comment does not belong to the specified task.'], 404);
+        }
+
         if (!$request->user()->isAdmin() && $comment->user_id !== $request->user()->id) {
             return response()->json(['message' => 'You cannot delete another member’s comment.'], 403);
         }

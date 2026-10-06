@@ -25,35 +25,69 @@ export default function TaskCreateModal({ isOpen, onClose, onTaskCreated, defaul
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { addToast } = useToast();
 
   useEffect(() => {
     if (isOpen) {
+      document.body.style.overflow = 'hidden';
       loadFormData();
       setErrors({});
       setShowNlpInput(false);
       setNlpPrompt('');
       if (defaultProjectId) setProjectId(defaultProjectId);
+    } else {
+      document.body.style.overflow = '';
     }
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isOpen, defaultProjectId]);
 
   const loadFormData = async () => {
     try {
-      const [projs, usrList] = await Promise.all([
-        projectService.getProjects(),
-        adminService.getUsers().catch(() => []),
-      ]);
+      const projs = await projectService.getProjects();
       setProjects(projs || []);
-      setUsers(usrList || []);
-      if (!projectId && projs.length > 0) {
-        setProjectId(projs[0].id);
+
+      const activeProjId = defaultProjectId || (projs && projs.length > 0 ? projs[0].id : '');
+      if (!projectId && activeProjId) {
+        setProjectId(activeProjId);
       }
+
+      let usrList = [];
+      if (isAdmin) {
+        usrList = await adminService.getUsers().catch(() => []);
+      } else if (activeProjId) {
+        usrList = await projectService.getMembers(activeProjId).catch(() => []);
+        if (!usrList || usrList.length === 0) {
+          usrList = user ? [user] : [];
+        }
+      } else if (user) {
+        usrList = [user];
+      }
+
+      setUsers(usrList || []);
       if (!assigneeId && user) {
         setAssigneeId(user.id);
       }
     } catch (err) {
       console.error('Failed to load form options:', err);
+    }
+  };
+
+  const handleProjectChange = async (newProjId) => {
+    setProjectId(newProjId);
+    if (!isAdmin && newProjId) {
+      try {
+        const members = await projectService.getMembers(newProjId);
+        if (members && members.length > 0) {
+          setUsers(members);
+        } else if (user) {
+          setUsers([user]);
+        }
+      } catch {
+        if (user) setUsers([user]);
+      }
     }
   };
 
@@ -122,14 +156,21 @@ export default function TaskCreateModal({ isOpen, onClose, onTaskCreated, defaul
   if (!isOpen) return null;
 
   return (
-    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1060 }} tabIndex="-1">
-      <div className="modal-dialog modal-dialog-centered modal-lg">
+    <div
+      className="modal show d-block"
+      style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1060 }}
+      tabIndex="-1"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="task-create-modal-title"
+    >
+      <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div className="modal-content shadow-lg border-0" style={{ backgroundColor: 'var(--tf-bg-surface)', borderColor: 'var(--tf-border)' }}>
           {/* Header */}
           <div className="modal-header border-bottom py-3">
             <div className="d-flex align-items-center gap-2">
-              <i className="bi bi-plus-circle text-primary fs-5"></i>
-              <h5 className="modal-title fw-bold">Create New Task</h5>
+              <i className="bi bi-plus-circle text-primary fs-5" aria-hidden="true"></i>
+              <h5 id="task-create-modal-title" className="modal-title fw-bold">Create New Task</h5>
             </div>
             <div className="d-flex align-items-center gap-2">
               <button
@@ -150,7 +191,7 @@ export default function TaskCreateModal({ isOpen, onClose, onTaskCreated, defaul
               {/* Natural Language Prompt Bar */}
               {showNlpInput && (
                 <div className="p-3 bg-light rounded border" style={{ backgroundColor: 'var(--tf-bg-subtle)' }}>
-                  <label className="form-label small fw-semibold text-muted text-uppercase mb-1">
+                  <label className="form-label small fw-semibold text-secondary mb-1">
                     AI Natural Language Creator
                   </label>
                   <div className="input-group">
@@ -200,7 +241,7 @@ export default function TaskCreateModal({ isOpen, onClose, onTaskCreated, defaul
                   <select
                     className="form-select"
                     value={projectId}
-                    onChange={(e) => setProjectId(e.target.value)}
+                    onChange={(e) => handleProjectChange(e.target.value)}
                   >
                     <option value="">No Project (General)</option>
                     {projects.map((p) => (
